@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg: #f7f2ea;
+    --surface: #ffffff;
+    --plate: #ece3d6;
+    --ink: #22140d;
+    --muted: #6a584b;
+    --line: #dccfbe;
+    --accent: #86570f;
+    --gold-fill: #cf9a3e;
+    --on-gold: #22140d;
+    --hero-bg: #22140d;
+    --hero-bg2: #4b2f1c;
+    --hero-ink: #f6efe2;
+    --hero-mute: #cdbfae;
+    --font-display: 'Marcellus', 'Hind Siliguri', Georgia, serif;
+    --font-body: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  .dark {
+    --bg: #17110d;
+    --surface: #241a14;
+    --plate: #2d221a;
+    --ink: #f1e6d8;
+    --muted: #b8a898;
+    --line: #3d2f25;
+    --accent: #e5a362;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+}
+
+@keyframes marqueeTick {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeTick 52s linear infinite;
+}
+
+.ticker-wrap:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}
+
+/* Crisp tabular currency numbers across storefront & admin */
+.tabular-price {
+  font-variant-numeric: tabular-nums;
+}

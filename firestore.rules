@@ -1,0 +1,241 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'sagorshikder707@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isVerifiedUser() && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'cat', 'price', 'createdAt'])
+        && data.keys().hasOnly(['name', 'cat', 'price', 'old', 'desc', 'tag', 'rating', 'reviews', 'image', 'thumb', 'images', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.cat is string && data.cat.size() >= 1 && data.cat.size() <= 60
+        && data.price is number && data.price >= 0 && data.price <= 10000000
+        && (!('old' in data) || (data.old is number && data.old >= 0 && data.old <= 10000000))
+        && (!('desc' in data) || (data.desc is string && data.desc.size() <= 1200))
+        && (!('tag' in data) || (data.tag is string && data.tag.size() <= 40))
+        && (!('rating' in data) || (data.rating is number && data.rating >= 0 && data.rating <= 5))
+        && (!('reviews' in data) || (data.reviews is number && data.reviews >= 0 && data.reviews <= 1000000))
+        && (!('image' in data) || (data.image is string && data.image.size() <= 950000))
+        && (!('thumb' in data) || (data.thumb is string && data.thumb.size() <= 450000))
+        && (!('images' in data) || (data.images is list && data.images.size() <= 4 && (data.images.size() == 0 || (data.images[0] is string && data.images[0].size() <= 950000))))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll(['name', 'phone', 'address', 'paymentMethod', 'total', 'status', 'items', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'name', 'phone', 'address', 'note', 'paymentMethod', 'total', 'status', 'items', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+        && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 24
+        && data.address is string && data.address.size() >= 3 && data.address.size() <= 300
+        && (!('note' in data) || (data.note is string && data.note.size() <= 400))
+        && data.paymentMethod in ['COD', 'bKash', 'Nagad', 'Rocket', 'IBBL']
+        && data.total is number && data.total >= 0 && data.total <= 50000000
+        && data.status in ['New', 'Confirmed', 'Delivered', 'Cancelled']
+        && data.items is list && data.items.size() >= 1 && data.items.size() <= 50
+        && data.items[0] is map
+        && (!('uid' in data) || data.uid == null || (isSignedIn() && data.uid == request.auth.uid))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['name', 'text', 'stars', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'name', 'text', 'stars', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 600
+        && data.stars is number && data.stars >= 1 && data.stars <= 5
+        && (!('uid' in data) || data.uid == null || (isSignedIn() && data.uid == request.auth.uid))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidGalleryItem(data) {
+      return data.keys().hasAll(['image', 'createdAt'])
+        && data.keys().hasOnly(['cat', 'title', 'image', 'createdAt'])
+        && (!('cat' in data) || (data.cat is string && data.cat.size() >= 1 && data.cat.size() <= 60))
+        && (!('title' in data) || (data.title is string && data.title.size() <= 120))
+        && data.image is string && data.image.size() >= 1 && data.image.size() <= 950000
+        && data.createdAt is timestamp;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['name', 'phone', 'interest', 'status', 'createdAt'])
+        && data.keys().hasOnly(['name', 'phone', 'interest', 'message', 'status', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 100
+        && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 24
+        && data.interest is string && data.interest.size() >= 1 && data.interest.size() <= 80
+        && (!('message' in data) || (data.message is string && data.message.size() <= 800))
+        && data.status in ['New', 'Contacted', 'Closed']
+        && data.createdAt is timestamp;
+    }
+
+    function isValidSiteSetting(data) {
+      return data.keys().hasOnly(['t', 'data', 'hero', 'updatedAt'])
+        && (!('t' in data) || data.t is map)
+        && (!('data' in data) || (data.data is string && data.data.size() <= 950000))
+        && (!('hero' in data) || (data.hero is string && data.hero.size() <= 950000))
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll(['uid', 'email'])
+        && data.keys().hasOnly(['uid', 'displayName', 'email', 'updatedAt'])
+        && data.uid is string && data.uid == userId && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 160
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100))
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    // Connection probe document
+    match /test/connection {
+      allow get: if true;
+    }
+
+    // Catalog products
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create: if isAdmin()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'cat', 'price', 'old', 'desc', 'tag', 'rating', 'reviews', 'image', 'thumb', 'images']);
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Customer orders (PII protected)
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId) && (isAdmin() || (isSignedIn() && existing().uid == request.auth.uid));
+      allow list: if isBootstrappedAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().status == 'New'
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'note']);
+      allow delete: if isAdmin() && isValidId(orderId);
+    }
+
+    // Customer reviews
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId);
+      allow list: if true;
+      allow create: if isValidId(reviewId)
+        && isValidReview(incoming())
+        && incoming().createdAt == request.time
+        && (isAdmin() || (isVerifiedUser() && incoming().uid == request.auth.uid));
+      allow update: if isAdmin()
+        && isValidId(reviewId)
+        && isValidReview(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'text', 'stars']);
+      allow delete: if isAdmin() && isValidId(reviewId);
+    }
+
+    // Gallery Showcase
+    match /gallery/{itemId} {
+      allow get: if isValidId(itemId);
+      allow list: if true;
+      allow create: if isAdmin()
+        && isValidId(itemId)
+        && isValidGalleryItem(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(itemId)
+        && isValidGalleryItem(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['cat', 'title', 'image']);
+      allow delete: if isAdmin() && isValidId(itemId);
+    }
+
+    // Contact & Custom Quote Inquiries (PII protected)
+    match /inquiries/{inquiryId} {
+      allow get: if isAdmin() && isValidId(inquiryId);
+      allow list: if isBootstrappedAdmin();
+      allow create: if isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().status == 'New'
+        && incoming().createdAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin() && isValidId(inquiryId);
+    }
+
+    // Storefront configuration & overrides
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(settingId) && isValidSiteSetting(incoming());
+      allow update: if isAdmin()
+        && isValidId(settingId)
+        && isValidSiteSetting(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['t', 'data', 'hero', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(settingId);
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isValidId(userId)
+        && (isOwner(userId) || isAdmin())
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // Admin roster (read-only by self)
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow write: if false;
+    }
+  }
+}
