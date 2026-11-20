@@ -1,16 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore';
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import {
   Database,
   Image as ImageIcon,
@@ -27,12 +15,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import {
-  ADMIN_EMAIL,
-  db,
-  handleFirestoreError,
-  OperationType,
-} from '../lib/firebase';
 import {
   DEFAULT_PRODUCTS,
   DEFAULT_SITE_TEXT,
@@ -54,7 +36,7 @@ interface OrderDoc {
   total: number;
   status: 'New' | 'Confirmed' | 'Delivered' | 'Cancelled';
   items: { id: string; name: string; price: number; qty: number }[];
-  createdAt?: { toDate?: () => Date };
+  createdAt?: string;
 }
 
 interface InquiryDoc {
@@ -64,7 +46,7 @@ interface InquiryDoc {
   interest: string;
   message?: string;
   status: 'New' | 'Contacted' | 'Closed';
-  createdAt?: { toDate?: () => Date };
+  createdAt?: string;
 }
 
 function compressImageFile(file: File, maxDim = 960, quality = 0.8): Promise<string> {
@@ -99,9 +81,11 @@ function compressImageFile(file: File, maxDim = 960, quality = 0.8): Promise<str
 export function AdminPage() {
   const {
     user,
+    authToken,
     authReady,
     isAdmin,
-    signInWithGoogle,
+    signInWithEmail,
+    setupAdminAccount,
     signOutUser,
     gallery,
     reviews,
@@ -112,9 +96,17 @@ export function AdminPage() {
   } = useStore();
 
   const [tab, setTab] = useState<AdminTab>('products');
-  const [fsProducts, setFsProducts] = useState<ProductRecord[]>([]);
+  const [dbProducts, setDbProducts] = useState<ProductRecord[]>([]);
   const [orders, setOrders] = useState<OrderDoc[]>([]);
   const [inquiries, setInquiries] = useState<InquiryDoc[]>([]);
+
+  // Auth form state
+  const [hasAdmin, setHasAdmin] = useState(true);
+  const [adminEmailHint, setAdminEmailHint] = useState('sagorshikder707@gmail.com');
+  const [loginEmail, setLoginEmail] = useState('sagorshikder707@gmail.com');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginConfirm, setLoginConfirm] = useState('');
+  const [authSubmitting, setAuthSubmitting] = useState(false);
 
   // Product editor state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -148,98 +140,68 @@ export function AdminPage() {
     setSText(siteText);
   }, [siteText]);
 
-  // Subscribe to admin collections only after verified admin sign-in
   useEffect(() => {
-    if (!isAdmin) {
-      setFsProducts([]);
+    fetch('/api/auth/status')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { hasAdmin?: boolean; adminEmail?: string } | null) => {
+        if (data) {
+          setHasAdmin(Boolean(data.hasAdmin));
+          if (data.adminEmail) {
+            setAdminEmailHint(data.adminEmail);
+            setLoginEmail(data.adminEmail);
+          }
+        }
+      })
+      .catch(() => {
+        // ignore
+      });
+  }, []);
+
+  const loadAdminOverview = useCallback(async () => {
+    if (!isAdmin || !authToken) return;
+    try {
+      const res = await fetch('/api/admin/overview', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        products?: ProductRecord[];
+        orders?: OrderDoc[];
+        inquiries?: InquiryDoc[];
+      };
+      setDbProducts(Array.isArray(data.products) ? data.products : []);
+      setOrders(Array.isArray(data.orders) ? data.orders : []);
+      setInquiries(Array.isArray(data.inquiries) ? data.inquiries : []);
+    } catch {
+      showToast('Could not refresh admin data');
+    }
+  }, [isAdmin, authToken, showToast]);
+
+  useEffect(() => {
+    if (!isAdmin || !authToken) {
+      setDbProducts([]);
       setOrders([]);
       setInquiries([]);
       return;
     }
+    loadAdminOverview();
+  }, [isAdmin, authToken, loadAdminOverview]);
 
-    const unsubProducts = onSnapshot(
-      query(collection(db, 'products'), orderBy('createdAt', 'desc')),
-      (snap) => {
-        setFsProducts(
-          snap.docs.map((d) => {
-            const data = d.data();
-            return {
-              id: d.id,
-              name: String(data.name || ''),
-              cat: String(data.cat || 'Wardrobe'),
-              price: Number(data.price) || 0,
-              old: Number(data.old) || 0,
-              desc: String(data.desc || ''),
-              tag: data.tag ? String(data.tag) : undefined,
-              rating: Number(data.rating) || 4.8,
-              reviews: Number(data.reviews) || 0,
-              image: String(data.thumb || data.image || ''),
-              thumb: data.thumb ? String(data.thumb) : undefined,
-              images: Array.isArray(data.images) ? data.images : undefined,
-            };
-          }),
-        );
+  const adminFetch = async (url: string, options: RequestInit = {}) => {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers || {}),
       },
-      (err) => {
-        console.warn('Products snapshot warning:', err);
-      },
-    );
-
-    const unsubOrders = onSnapshot(
-      query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
-      (snap) => {
-        setOrders(
-          snap.docs.map((d) => {
-            const data = d.data();
-            return {
-              id: d.id,
-              name: String(data.name || ''),
-              phone: String(data.phone || ''),
-              address: String(data.address || ''),
-              note: data.note ? String(data.note) : undefined,
-              paymentMethod: String(data.paymentMethod || 'COD'),
-              total: Number(data.total) || 0,
-              status: (data.status as OrderDoc['status']) || 'New',
-              items: Array.isArray(data.items) ? data.items : [],
-              createdAt: data.createdAt,
-            };
-          }),
-        );
-      },
-      (err) => {
-        console.warn('Orders snapshot warning:', err);
-      },
-    );
-
-    const unsubInquiries = onSnapshot(
-      query(collection(db, 'inquiries'), orderBy('createdAt', 'desc')),
-      (snap) => {
-        setInquiries(
-          snap.docs.map((d) => {
-            const data = d.data();
-            return {
-              id: d.id,
-              name: String(data.name || ''),
-              phone: String(data.phone || ''),
-              interest: String(data.interest || ''),
-              message: data.message ? String(data.message) : undefined,
-              status: (data.status as InquiryDoc['status']) || 'New',
-              createdAt: data.createdAt,
-            };
-          }),
-        );
-      },
-      (err) => {
-        console.warn('Inquiries snapshot warning:', err);
-      },
-    );
-
-    return () => {
-      unsubProducts();
-      unsubOrders();
-      unsubInquiries();
-    };
-  }, [isAdmin]);
+    });
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) {
+      throw new Error(body.error || 'Request failed');
+    }
+    return body;
+  };
 
   const resetProductForm = () => {
     setEditingId(null);
@@ -278,42 +240,35 @@ export function AdminPage() {
 
     setSavingProduct(true);
     try {
-      const baseFields: Record<string, unknown> = {
+      const payload = {
         name: trimmedName,
         cat: pCat.trim() || 'Wardrobe',
         price: numericPrice,
+        old: pOld && Number(pOld) > 0 ? Number(pOld) : 0,
+        desc: pDesc.trim(),
+        tag: pTag.trim() || undefined,
+        image: pImage || undefined,
+        images: pImage ? [pImage] : undefined,
+        thumb: pThumb || undefined,
       };
-      if (pOld && Number(pOld) > 0) baseFields.old = Number(pOld);
-      if (pDesc.trim()) baseFields.desc = pDesc.trim();
-      if (pTag.trim()) baseFields.tag = pTag.trim();
-      if (pImage) {
-        baseFields.image = pImage;
-        baseFields.images = [pImage];
-      }
-      if (pThumb) baseFields.thumb = pThumb;
 
       if (editingId) {
-        try {
-          await updateDoc(doc(db, 'products', editingId), baseFields);
-        } catch (err) {
-          handleFirestoreError(err, OperationType.UPDATE, `products/${editingId}`);
-        }
+        await adminFetch(`/api/admin/products/${encodeURIComponent(editingId)}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
         showToast('Product updated');
       } else {
-        try {
-          await addDoc(collection(db, 'products'), {
-            ...baseFields,
-            rating: 4.9,
-            reviews: 1,
-            createdAt: serverTimestamp(),
-          });
-        } catch (err) {
-          handleFirestoreError(err, OperationType.CREATE, 'products');
-        }
+        await adminFetch('/api/admin/products', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
         showToast('Product added to catalog');
       }
       resetProductForm();
-      await refreshCatalog();
+      await Promise.all([loadAdminOverview(), refreshCatalog()]);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to save product');
     } finally {
       setSavingProduct(false);
     }
@@ -321,72 +276,70 @@ export function AdminPage() {
 
   const handleSeedDefaults = async () => {
     try {
-      for (const item of DEFAULT_PRODUCTS) {
-        const docFields: Record<string, unknown> = {
-          name: item.name,
-          cat: item.cat,
-          price: item.price,
-          old: item.old || 0,
-          desc: item.desc,
-          rating: item.rating,
-          reviews: item.reviews,
-          image: item.image,
-          images: item.images || [item.image],
-          createdAt: serverTimestamp(),
-        };
-        if (item.tag) docFields.tag = item.tag;
-        await setDoc(doc(db, 'products', `seed_${item.id}`), docFields);
-      }
-      await refreshCatalog();
-      showToast('Curated catalog imported to Firestore');
+      await adminFetch('/api/admin/products/seed', {
+        method: 'POST',
+        body: JSON.stringify({ items: DEFAULT_PRODUCTS }),
+      });
+      await Promise.all([loadAdminOverview(), refreshCatalog()]);
+      showToast('Curated catalog imported to MySQL');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'products');
+      showToast(err instanceof Error ? err.message : 'Import failed');
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'products', id));
-      await refreshCatalog();
+      await adminFetch(`/api/admin/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await Promise.all([loadAdminOverview(), refreshCatalog()]);
       showToast('Product deleted');
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
+      showToast(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
   const handleUpdateOrderStatus = async (id: string, status: OrderDoc['status']) => {
     try {
-      await updateDoc(doc(db, 'orders', id), { status });
+      await adminFetch(`/api/admin/orders/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      await loadAdminOverview();
       showToast(`Order marked ${status}`);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `orders/${id}`);
+      showToast(err instanceof Error ? err.message : 'Update failed');
     }
   };
 
   const handleDeleteOrder = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'orders', id));
+      await adminFetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await loadAdminOverview();
       showToast('Order removed');
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `orders/${id}`);
+      showToast(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
   const handleUpdateInquiryStatus = async (id: string, status: InquiryDoc['status']) => {
     try {
-      await updateDoc(doc(db, 'inquiries', id), { status });
+      await adminFetch(`/api/admin/inquiries/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      await loadAdminOverview();
       showToast(`Inquiry marked ${status}`);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `inquiries/${id}`);
+      showToast(err instanceof Error ? err.message : 'Update failed');
     }
   };
 
   const handleDeleteInquiry = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'inquiries', id));
+      await adminFetch(`/api/admin/inquiries/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await loadAdminOverview();
       showToast('Inquiry deleted');
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `inquiries/${id}`);
+      showToast(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
@@ -410,17 +363,20 @@ export function AdminPage() {
     }
     setSavingGallery(true);
     try {
-      await addDoc(collection(db, 'gallery'), {
-        cat: gCat,
-        title: gTitle.trim() || `${gCat} Project`,
-        image: gImage,
-        createdAt: serverTimestamp(),
+      await adminFetch('/api/admin/gallery', {
+        method: 'POST',
+        body: JSON.stringify({
+          cat: gCat,
+          title: gTitle.trim() || `${gCat} Project`,
+          image: gImage,
+        }),
       });
       setGTitle('');
       setGImage('');
+      await refreshCatalog();
       showToast('Added to gallery');
     } catch (err) {
-      handleFirestoreError(err, OperationType.CREATE, 'gallery');
+      showToast(err instanceof Error ? err.message : 'Gallery upload failed');
     } finally {
       setSavingGallery(false);
     }
@@ -428,10 +384,11 @@ export function AdminPage() {
 
   const handleDeleteGalleryItem = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'gallery', id));
+      await adminFetch(`/api/admin/gallery/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await refreshCatalog();
       showToast('Gallery photo deleted');
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `gallery/${id}`);
+      showToast(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
@@ -443,19 +400,21 @@ export function AdminPage() {
     }
     setSavingReview(true);
     try {
-      await addDoc(collection(db, 'reviews'), {
-        uid: user?.uid || null,
-        name: rName.trim(),
-        text: rText.trim(),
-        stars: rStars,
-        createdAt: serverTimestamp(),
+      await adminFetch('/api/admin/reviews', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: rName.trim(),
+          text: rText.trim(),
+          stars: rStars,
+        }),
       });
       setRName('');
       setRText('');
       setRStars(5);
+      await refreshCatalog();
       showToast('Review published');
     } catch (err) {
-      handleFirestoreError(err, OperationType.CREATE, 'reviews');
+      showToast(err instanceof Error ? err.message : 'Could not publish review');
     } finally {
       setSavingReview(false);
     }
@@ -463,10 +422,11 @@ export function AdminPage() {
 
   const handleDeleteReview = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'reviews', id));
+      await adminFetch(`/api/admin/reviews/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await refreshCatalog();
       showToast('Review deleted');
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `reviews/${id}`);
+      showToast(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
@@ -474,17 +434,14 @@ export function AdminPage() {
     e.preventDefault();
     setSavingSettings(true);
     try {
-      await setDoc(
-        doc(db, 'settings', 'site'),
-        {
-          t: sText,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
+      await adminFetch('/api/admin/settings/text', {
+        method: 'PUT',
+        body: JSON.stringify({ siteText: sText }),
+      });
+      await refreshCatalog();
       showToast('Storefront content updated');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'settings/site');
+      showToast(err instanceof Error ? err.message : 'Could not update settings');
     } finally {
       setSavingSettings(false);
     }
@@ -495,21 +452,43 @@ export function AdminPage() {
     if (!file) return;
     try {
       const compressed = await compressImageFile(file, slotKey === 'hero' ? 1280 : 600, 0.8);
-      if (slotKey === 'hero') {
-        await setDoc(
-          doc(db, 'settings', 'site'),
-          { hero: compressed, updatedAt: serverTimestamp() },
-          { merge: true },
-        );
-      } else {
-        await setDoc(doc(db, 'settings', `img-${slotKey}`), {
-          data: compressed,
-          updatedAt: serverTimestamp(),
-        });
-      }
+      await adminFetch(`/api/admin/settings/image/${encodeURIComponent(slotKey)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ data: compressed }),
+      });
+      await refreshCatalog();
       showToast('Site image updated');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `settings/img-${slotKey}`);
+      showToast(err instanceof Error ? err.message : 'Could not update image');
+    }
+  };
+
+  const handleAdminAuthSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail.trim() || !loginPassword) {
+      showToast('Enter your email and password');
+      return;
+    }
+    if (!hasAdmin && loginPassword !== loginConfirm) {
+      showToast('Passwords do not match');
+      return;
+    }
+    setAuthSubmitting(true);
+    try {
+      if (!hasAdmin) {
+        await setupAdminAccount(loginEmail.trim(), loginPassword, 'Store Owner');
+        setHasAdmin(true);
+        showToast('Admin password configured');
+      } else {
+        await signInWithEmail(loginEmail.trim(), loginPassword);
+        showToast('Signed in to Admin Studio');
+      }
+      setLoginPassword('');
+      setLoginConfirm('');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
@@ -524,16 +503,16 @@ export function AdminPage() {
   if (!user || !isAdmin) {
     return (
       <main className="min-h-[70vh] flex items-center justify-center px-4 py-16">
-        <div className="max-w-md w-full rounded-2xl bg-white dark:bg-[#241a14] border border-[#dccfbe] dark:border-[#3d2f25] p-8 text-center shadow-xl">
+        <div className="max-w-md w-full rounded-2xl bg-white dark:bg-[#241a14] border border-[#dccfbe] dark:border-[#3d2f25] p-8 shadow-xl">
           <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#cf9a3e]/20 text-[#86570f] dark:text-[#e5a362] grid place-items-center">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <h1 className="font-display text-2xl mb-2">Admin Studio Portal</h1>
+          <h1 className="font-display text-2xl mb-2 text-center">Admin Studio Portal</h1>
           {user && !isAdmin ? (
-            <>
+            <div className="text-center">
               <p className="text-sm text-[#6a584b] dark:text-[#b8a898] mb-5">
                 Signed in as <strong>{user.email}</strong>. Store management requires the verified
-                owner account ({ADMIN_EMAIL}).
+                owner account ({adminEmailHint}).
               </p>
               <button
                 type="button"
@@ -542,28 +521,69 @@ export function AdminPage() {
               >
                 Sign out and switch account
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              <p className="text-sm text-[#6a584b] dark:text-[#b8a898] mb-6">
-                Sign in with the verified store administrator Google account to manage products,
-                customer orders, inquiries, gallery photos, and site copy.
+            <form onSubmit={handleAdminAuthSubmit} className="space-y-4">
+              <p className="text-sm text-[#6a584b] dark:text-[#b8a898] text-center">
+                {hasAdmin
+                  ? 'Sign in with your administrator email and password to manage products, orders, inquiries, and site content.'
+                  : `Create the owner password for ${adminEmailHint} to unlock your MySQL Admin Studio.`}
               </p>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Admin Email</label>
+                <input
+                  type="email"
+                  required
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
+                />
+              </div>
+
+              {!hasAdmin && (
+                <div>
+                  <label className="block text-xs font-semibold mb-1">Confirm Password</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={loginConfirm}
+                    onChange={(e) => setLoginConfirm(e.target.value)}
+                    placeholder="Re-enter password"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
+                  />
+                </div>
+              )}
+
               <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await signInWithGoogle();
-                  } catch {
-                    showToast('Sign-in cancelled or blocked');
-                  }
-                }}
-                className="w-full py-3 rounded-lg bg-[#cf9a3e] text-[#22140d] font-semibold text-sm inline-flex items-center justify-center gap-2 hover:brightness-105 cursor-pointer"
+                type="submit"
+                disabled={authSubmitting}
+                className="w-full py-3 rounded-lg bg-[#cf9a3e] text-[#22140d] font-semibold text-sm inline-flex items-center justify-center gap-2 hover:brightness-105 disabled:opacity-60 cursor-pointer"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign in with Google</span>
+                <span>
+                  {authSubmitting
+                    ? 'Please wait...'
+                    : hasAdmin
+                      ? 'Sign In to Admin Studio'
+                      : 'Create Admin Password'}
+                </span>
               </button>
-            </>
+            </form>
           )}
         </div>
       </main>
@@ -595,7 +615,7 @@ export function AdminPage() {
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 pb-4 mb-8 border-b border-[#dccfbe] dark:border-[#3d2f25]">
           {[
-            { id: 'products' as const, label: `Products (${fsProducts.length})`, icon: Package },
+            { id: 'products' as const, label: `Products (${dbProducts.length})`, icon: Package },
             { id: 'orders' as const, label: `Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'inquiries' as const, label: `Inquiries (${inquiries.length})`, icon: MessageSquare },
             { id: 'gallery' as const, label: `Gallery (${gallery.length})`, icon: ImageIcon },
@@ -744,12 +764,12 @@ export function AdminPage() {
             </form>
 
             <div className="space-y-4">
-              {fsProducts.length === 0 && (
+              {dbProducts.length === 0 && (
                 <div className="rounded-2xl bg-white dark:bg-[#241a14] border border-[#dccfbe] dark:border-[#3d2f25] p-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-display text-lg">Firestore Catalog Is Empty</h3>
+                    <h3 className="font-display text-lg">Database Catalog Is Empty</h3>
                     <p className="text-xs text-[#6a584b] dark:text-[#b8a898]">
-                      The storefront is displaying curated fallback products. Import them into Firestore to edit or customize prices.
+                      The storefront is displaying curated fallback products. Import them into MySQL to edit or customize prices.
                     </p>
                   </div>
                   <button
@@ -764,7 +784,7 @@ export function AdminPage() {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {fsProducts.map((item) => (
+                {dbProducts.map((item) => (
                   <div
                     key={item.id}
                     className="rounded-2xl bg-white dark:bg-[#241a14] border border-[#dccfbe] dark:border-[#3d2f25] p-4 flex gap-3.5 items-center"

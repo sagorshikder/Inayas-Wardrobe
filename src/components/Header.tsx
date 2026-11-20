@@ -18,7 +18,6 @@ export function Header() {
     wishlist,
     user,
     isAdmin,
-    signInWithGoogle,
     signOutUser,
     showToast,
   } = useStore();
@@ -67,15 +66,6 @@ export function Header() {
     setSearchOpen(false);
     setMobileMenuOpen(false);
     navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop');
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      showToast('Signed in successfully');
-    } catch {
-      showToast('Sign-in was cancelled or failed');
-    }
   };
 
   return (
@@ -322,11 +312,14 @@ export function Header() {
                     ) : (
                       <button
                         type="button"
-                        onClick={handleGoogleSignIn}
+                        onClick={() => {
+                          setAccountOpen(false);
+                          navigate('/admin');
+                        }}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#cf9a3e] text-[#22140d] font-semibold hover:brightness-105 cursor-pointer"
                       >
                         <LogIn className="w-4 h-4" />
-                        <span>Sign in with Google</span>
+                        <span>Sign in to Portal</span>
                       </button>
                     )}
                   </div>

@@ -7,27 +7,6 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-} from 'firebase/firestore';
-import {
-  ADMIN_EMAIL,
-  auth,
-  db,
-  googleProvider,
-  handleFirestoreError,
-  OperationType,
-  testConnection,
-} from '../lib/firebase';
 import {
   DEFAULT_GALLERY,
   DEFAULT_PRODUCTS,
@@ -46,6 +25,13 @@ import {
   type CartItem,
   type PaymentMethod,
 } from '../utils/commerce';
+
+export interface AuthUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  role: 'admin' | 'customer';
+}
 
 export interface PaymentModalState {
   open: boolean;
@@ -86,10 +72,13 @@ interface StoreContextValue {
   closePaymentModal: () => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
-  user: User | null;
+  user: AuthUser | null;
+  authToken: string | null;
   authReady: boolean;
   isAdmin: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  registerCustomer: (name: string, email: string, password: string) => Promise<void>;
+  setupAdminAccount: (email: string, password: string, name?: string) => Promise<void>;
   signOutUser: () => Promise<void>;
   submitCustomerOrder: (input: {
     name: string;
@@ -109,6 +98,7 @@ interface StoreContextValue {
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
+const TOKEN_STORAGE_KEY = 'inaya-auth-token';
 
 function readStorage<T>(key: string, fallback: T): T {
   try {
@@ -160,7 +150,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(TOKEN_STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -236,83 +233,114 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [wishlist]);
 
-  // Initial Firestore connectivity probe & Auth listener
+  // Verify stored session token with Express API
   useEffect(() => {
-    testConnection();
-
-    const unsubAuth = onAuthStateChanged(auth, async (nextUser) => {
-      setUser(nextUser);
-      if (nextUser) {
-        try {
-          const idToken = await nextUser.getIdToken();
-          const res = await fetch('/api/auth/session', {
-            headers: { Authorization: `Bearer ${idToken}` },
-          });
-          if (res.ok) {
-            const session = (await res.json()) as { isAdmin?: boolean };
-            setIsAdmin(Boolean(session.isAdmin));
-          } else {
-            setIsAdmin(
-              Boolean(nextUser.emailVerified) &&
-                nextUser.email?.toLowerCase() === ADMIN_EMAIL,
-            );
-          }
-          // Sync user profile record to Firestore cleanly
-          await setDoc(
-            doc(db, 'users', nextUser.uid),
-            {
-              uid: nextUser.uid,
-              email: nextUser.email || '',
-              displayName: nextUser.displayName || '',
-              updatedAt: serverTimestamp(),
-            },
-            { merge: true },
-          );
-        } catch {
-          setIsAdmin(
-            Boolean(nextUser.emailVerified) &&
-              nextUser.email?.toLowerCase() === ADMIN_EMAIL,
-          );
+    let active = true;
+    async function restoreSession() {
+      if (!authToken) {
+        if (active) {
+          setUser(null);
+          setIsAdmin(false);
+          setAuthReady(true);
         }
-      } else {
-        setIsAdmin(false);
+        return;
       }
-      setAuthReady(true);
-    });
-
-    return () => unsubAuth();
-  }, []);
+      try {
+        const res = await fetch('/api/auth/session', {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (!res.ok) {
+          throw new Error('Expired session');
+        }
+        const data = (await res.json()) as {
+          uid: string;
+          email: string;
+          displayName: string;
+          role: 'admin' | 'customer';
+          isAdmin: boolean;
+        };
+        if (active) {
+          setUser({
+            uid: data.uid,
+            email: data.email,
+            displayName: data.displayName,
+            role: data.role,
+          });
+          setIsAdmin(Boolean(data.isAdmin));
+        }
+      } catch {
+        try {
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+        if (active) {
+          setAuthToken(null);
+          setUser(null);
+          setIsAdmin(false);
+        }
+      } finally {
+        if (active) setAuthReady(true);
+      }
+    }
+    restoreSession();
+    return () => {
+      active = false;
+    };
+  }, [authToken]);
 
   const refreshCatalog = useCallback(async () => {
     setProductsLoading(true);
     try {
-      const snap = await getDocs(query(collection(db, 'products'), orderBy('createdAt', 'desc')));
-      if (!snap.empty) {
-        const list: ProductRecord[] = snap.docs.map((d) => {
-          const data = d.data();
-          const imgs = Array.isArray(data.images) ? data.images.filter(Boolean) : [];
-          return {
-            id: d.id,
-            name: String(data.name || 'Product'),
-            cat: String(data.cat || 'Furniture'),
-            price: Number(data.price) || 0,
-            old: Number(data.old) || 0,
-            desc: String(data.desc || "Crafted furniture from Inaya's Wardrobe."),
-            tag: data.tag ? String(data.tag) : undefined,
-            rating: Number(data.rating) || 4.8,
-            reviews: Number(data.reviews) || 0,
-            image: String(data.thumb || data.image || imgs[0] || DEFAULT_PRODUCTS[0].image),
-            thumb: data.thumb ? String(data.thumb) : undefined,
-            images: imgs.length ? imgs : [String(data.image || DEFAULT_PRODUCTS[0].image)],
-          };
-        });
-        setProducts(list);
+      const res = await fetch('/api/storefront');
+      if (!res.ok) throw new Error('Failed to load storefront');
+      const data = (await res.json()) as {
+        products?: ProductRecord[];
+        reviews?: ReviewRecord[];
+        gallery?: GalleryRecord[];
+        siteText?: Partial<SiteTextConfig>;
+        siteImages?: Record<string, string>;
+      };
+
+      if (Array.isArray(data.products) && data.products.length > 0) {
+        setProducts(
+          data.products.map((p) => ({
+            ...p,
+            image: p.thumb || p.image || DEFAULT_PRODUCTS[0].image,
+            images: p.images && p.images.length ? p.images : [p.image || DEFAULT_PRODUCTS[0].image],
+          })),
+        );
       } else {
         setProducts(DEFAULT_PRODUCTS);
       }
-    } catch (error) {
-      console.warn('Using curated catalog defaults:', error);
+
+      if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+        setReviews(data.reviews);
+      } else {
+        setReviews(DEFAULT_REVIEWS);
+      }
+
+      if (Array.isArray(data.gallery) && data.gallery.length > 0) {
+        setGallery(data.gallery);
+      } else {
+        setGallery(DEFAULT_GALLERY);
+      }
+
+      const nextText = { ...DEFAULT_SITE_TEXT };
+      if (data.siteText && typeof data.siteText === 'object') {
+        Object.entries(data.siteText).forEach(([k, v]) => {
+          if (typeof v === 'string' && v.trim() && k in nextText) {
+            (nextText as Record<string, string>)[k] = v.trim();
+          }
+        });
+      }
+      setSiteText(nextText);
+      setSiteImages(data.siteImages && typeof data.siteImages === 'object' ? data.siteImages : {});
+    } catch {
       setProducts(DEFAULT_PRODUCTS);
+      setReviews(DEFAULT_REVIEWS);
+      setGallery(DEFAULT_GALLERY);
+      setSiteText(DEFAULT_SITE_TEXT);
     } finally {
       setProductsLoading(false);
     }
@@ -320,88 +348,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshCatalog();
-
-    const unsubReviews = onSnapshot(
-      query(collection(db, 'reviews'), orderBy('createdAt', 'desc')),
-      (snap) => {
-        if (snap.empty) {
-          setReviews(DEFAULT_REVIEWS);
-          return;
-        }
-        setReviews(
-          snap.docs.map((d) => {
-            const data = d.data();
-            return {
-              id: d.id,
-              name: String(data.name || 'Verified Customer'),
-              text: String(data.text || ''),
-              stars: Math.max(1, Math.min(5, Number(data.stars) || 5)),
-            };
-          }),
-        );
-      },
-      () => setReviews(DEFAULT_REVIEWS),
-    );
-
-    const unsubGallery = onSnapshot(
-      query(collection(db, 'gallery'), orderBy('createdAt', 'desc')),
-      (snap) => {
-        if (snap.empty) {
-          setGallery(DEFAULT_GALLERY);
-          return;
-        }
-        const dynamicItems: GalleryRecord[] = snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            cat: String(data.cat || 'Wardrobe'),
-            title: String(data.title || 'Completed Home Project'),
-            image: String(data.image || ''),
-          };
-        });
-        setGallery(dynamicItems);
-      },
-      () => setGallery(DEFAULT_GALLERY),
-    );
-
-    const unsubSettings = onSnapshot(
-      collection(db, 'settings'),
-      (snap) => {
-        const nextText = { ...DEFAULT_SITE_TEXT };
-        const nextImgs: Record<string, string> = {};
-        snap.forEach((d) => {
-          if (d.id === 'site') {
-            const data = d.data();
-            if (data.t && typeof data.t === 'object') {
-              Object.entries(data.t as Record<string, string>).forEach(([k, v]) => {
-                if (typeof v === 'string' && v.trim() && k in nextText) {
-                  (nextText as Record<string, string>)[k] = v.trim();
-                }
-              });
-            }
-            if (typeof data.hero === 'string' && data.hero) {
-              nextImgs.hero = data.hero;
-            }
-          } else if (d.id.startsWith('img-')) {
-            const val = d.data().data;
-            if (typeof val === 'string' && val) {
-              nextImgs[d.id.slice(4)] = val;
-            }
-          }
-        });
-        setSiteText(nextText);
-        setSiteImages(nextImgs);
-      },
-      () => {
-        setSiteText(DEFAULT_SITE_TEXT);
-      },
-    );
-
-    return () => {
-      unsubReviews();
-      unsubGallery();
-      unsubSettings();
-    };
   }, [refreshCatalog]);
 
   const toggleTheme = useCallback(() => {
@@ -461,12 +407,90 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setPaymentModal((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    await signInWithPopup(auth, googleProvider);
+  const persistAuth = useCallback((token: string, nextUser: AuthUser, adminFlag: boolean) => {
+    try {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } catch {
+      // ignore
+    }
+    setAuthToken(token);
+    setUser(nextUser);
+    setIsAdmin(adminFlag);
+    setAuthReady(true);
   }, []);
 
+  const signInWithEmail = useCallback(
+    async (email: string, password: string) => {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        token?: string;
+        user?: AuthUser;
+        isAdmin?: boolean;
+      };
+      if (!res.ok || !data.token || !data.user) {
+        throw new Error(data.error || 'Sign-in failed.');
+      }
+      persistAuth(data.token, data.user, Boolean(data.isAdmin));
+    },
+    [persistAuth],
+  );
+
+  const registerCustomer = useCallback(
+    async (name: string, email: string, password: string) => {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        token?: string;
+        user?: AuthUser;
+        isAdmin?: boolean;
+      };
+      if (!res.ok || !data.token || !data.user) {
+        throw new Error(data.error || 'Registration failed.');
+      }
+      persistAuth(data.token, data.user, Boolean(data.isAdmin));
+    },
+    [persistAuth],
+  );
+
+  const setupAdminAccount = useCallback(
+    async (email: string, password: string, name?: string) => {
+      const res = await fetch('/api/auth/setup-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        token?: string;
+        user?: AuthUser;
+        isAdmin?: boolean;
+      };
+      if (!res.ok || !data.token || !data.user) {
+        throw new Error(data.error || 'Admin setup failed.');
+      }
+      persistAuth(data.token, data.user, Boolean(data.isAdmin));
+    },
+    [persistAuth],
+  );
+
   const signOutUser = useCallback(async () => {
-    await signOut(auth);
+    try {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    setAuthToken(null);
+    setUser(null);
+    setIsAdmin(false);
   }, []);
 
   const submitCustomerOrder = useCallback(
@@ -478,71 +502,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       paymentMethod: PaymentMethod;
       items: CartItem[];
     }): Promise<string> => {
-      // Server-side validation & total normalization via Node.js Express API
-      const valRes = await fetch('/api/orders/validate', {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+      }
+      const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(input),
       });
-      const valData = (await valRes.json()) as {
-        valid: boolean;
-        error?: string;
-        normalizedTotal: number;
-      };
-      if (!valRes.ok || !valData.valid) {
-        throw new Error(valData.error || 'Order validation failed.');
+      const data = (await res.json()) as { id?: string; error?: string };
+      if (!res.ok || !data.id) {
+        throw new Error(data.error || 'Order submission failed.');
       }
-
-      const payload: Record<string, unknown> = {
-        name: input.name.trim(),
-        phone: input.phone.trim(),
-        address: input.address.trim(),
-        paymentMethod: input.paymentMethod,
-        total: valData.normalizedTotal,
-        status: 'New',
-        items: input.items.map((i) => ({
-          id: String(i.id),
-          name: String(i.name),
-          price: Number(i.price),
-          qty: Number(i.qty),
-        })),
-        createdAt: serverTimestamp(),
-      };
-      if (input.note && input.note.trim()) {
-        payload.note = input.note.trim();
-      }
-      if (auth.currentUser?.uid) {
-        payload.uid = auth.currentUser.uid;
-      }
-
-      try {
-        const ref = await addDoc(collection(db, 'orders'), payload);
-        return ref.id;
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, 'orders');
-      }
+      return data.id;
     },
-    [],
+    [authToken],
   );
 
   const submitContactInquiry = useCallback(
     async (input: { name: string; phone: string; interest: string; message?: string }) => {
-      const payload: Record<string, unknown> = {
-        name: input.name.trim(),
-        phone: input.phone.trim(),
-        interest: input.interest.trim(),
-        status: 'New',
-        createdAt: serverTimestamp(),
-      };
-      if (input.message && input.message.trim()) {
-        payload.message = input.message.trim();
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      const data = (await res.json()) as { id?: string; error?: string };
+      if (!res.ok || !data.id) {
+        throw new Error(data.error || 'Could not submit inquiry.');
       }
-      try {
-        const ref = await addDoc(collection(db, 'inquiries'), payload);
-        return ref.id;
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, 'inquiries');
-      }
+      return data.id;
     },
     [],
   );
@@ -583,9 +572,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toastMessage,
     showToast,
     user,
+    authToken,
     authReady,
     isAdmin,
-    signInWithGoogle,
+    signInWithEmail,
+    registerCustomer,
+    setupAdminAccount,
     signOutUser,
     submitCustomerOrder,
     submitContactInquiry,
