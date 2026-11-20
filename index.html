@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inaya's Wardrobe | Custom Wardrobe &amp; Furniture in Bangladesh</title>
+<meta name="description" content="Premium custom wardrobes and quality furniture made to your size. Bedroom, living room and dining furniture from Inaya's Wardrobe, Bangladesh. Pay with bKash, Nagad, Rocket or bank.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://inayaswardrobe.com/">
+<meta name="theme-color" content="#22140d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Marcellus&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Marcellus&display=swap"></noscript>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Inaya's Wardrobe">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Inaya's Wardrobe | Custom Wardrobe &amp; Furniture in Bangladesh">
+<meta property="og:description" content="Premium custom wardrobes and quality furniture made to your size. Bedroom, living room and dining furniture from Inaya's Wardrobe, Bangladesh. Pay with bKash, Nagad, Rocket or bank.">
+<meta property="og:url" content="https://inayaswardrobe.com/">
+<meta property="og:image" content="https://inayaswardrobe.com/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Inaya's Wardrobe | Custom Wardrobe &amp; Furniture in Bangladesh">
+<meta name="twitter:description" content="Premium custom wardrobes and quality furniture made to your size. Bedroom, living room and dining furniture from Inaya's Wardrobe, Bangladesh. Pay with bKash, Nagad, Rocket or bank.">
+<meta name="twitter:image" content="https://inayaswardrobe.com/og-image.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://inayaswardrobe.com/#website", "url": "https://inayaswardrobe.com/", "name": "Inaya's Wardrobe", "inLanguage": "en"}, {"@type": "FurnitureStore", "@id": "https://inayaswardrobe.com/#business", "name": "Inaya's Wardrobe", "url": "https://inayaswardrobe.com/", "image": "https://inayaswardrobe.com/og-image.jpg", "logo": "https://inayaswardrobe.com/Logo.png", "description": "Custom wardrobes and quality furniture in Bangladesh.", "address": {"@type": "PostalAddress", "addressLocality": "Pangsha", "addressRegion": "Rajbari", "addressCountry": "BD"}, "areaServed": {"@type": "Country", "name": "Bangladesh"}, "priceRange": "৳৳", "paymentAccepted": "bKash, Nagad, Rocket, Islami Bank", "telephone": "+8801714000349"}]}</script>
+<style>
+/* ===== 1. TOKENS ===== */
+:root{--bg:#f7f2ea;--surface:#fff;--plate:#ece3d6;--ink:#22140d;--muted:#6a584b;--line:#dccfbe;--accent:#86570f;--gold-fill:#cf9a3e;--on-gold:#22140d;
+--hero-bg:#22140d;--hero-bg2:#4b2f1c;--hero-ink:#f6efe2;--hero-mute:#cdbfae;--wa:#17803d;--star:#d9a441;
+--font-display:'Marcellus','Hind Siliguri',Georgia,serif;--font-body:'Hind Siliguri',system-ui,-apple-system,'Segoe UI',sans-serif;
+--brown:#cf9a3e;--brown-dark:#86570f;--cream:#f7f2ea;--sand:#ece3d6;--card:#ece3d6;--text:#22140d;--gold:#cf9a3e}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font-body);font-size:16px;background:var(--bg);color:var(--ink);line-height:1.55}
+a{text-decoration:none;color:inherit}ul,ol{list-style:none}img{max-width:100%}
+.wrap{max-width:1240px;margin:auto;padding:0 24px}
+:focus-visible{outline:2px solid var(--gold-fill);outline-offset:2px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400}
+html[lang=bn] h1{line-height:1.3!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.ticker{overflow-x:auto}}
+
+html[data-theme="dark"]{--bg:#17110d;--surface:#241a14;--plate:#2d221a;--ink:#f1e6d8;--muted:#b8a898;--line:#3d2f25;--accent:#e5a362;--text:#f1e6d8}
+/* ===== 2. TOP BAR + TICKER ===== */
+.topbar{background:var(--hero-bg);color:var(--hero-mute);font-size:.82rem}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:7px;padding-bottom:7px;gap:12px;flex-wrap:wrap}
+.topbar a:hover{color:#fff;text-decoration:underline}
+.ticker{overflow:hidden;background:var(--hero-bg2);color:var(--hero-ink)}
+.tick-in{display:flex;width:max-content;animation:tick 55s linear infinite}
+.ticker:hover .tick-in{animation-play-state:paused}
+.tick-in span{padding:9px 30px;white-space:nowrap;font-size:.9rem;position:relative}
+.tick-in span::after{content:"";position:absolute;right:-3px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--gold-fill)}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ===== 3. HEADER ===== */
+header{background:rgba(247,242,234,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+header .wrap{max-width:1600px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:10px;padding-bottom:10px}
+.logo{display:flex;align-items:center;gap:14px;white-space:nowrap;flex-shrink:0}
+.logo img{height:60px;width:auto;display:block}
+.logo-text{display:flex;flex-direction:column;border-left:1px solid var(--line);padding-left:14px}
+.logo-text strong{font-family:var(--font-display);font-size:clamp(1.15rem,1.7vw,1.5rem);font-weight:400;letter-spacing:.06em;line-height:1.1}
+nav{flex:1;min-width:0}
+nav ul{display:flex;gap:2px;justify-content:center}
+nav a{display:block;white-space:nowrap;font-size:.95rem;padding:8px clamp(8px,.8vw,13px);border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+nav a:hover{border-color:var(--line)}
+nav a.active{color:var(--accent);border-color:var(--gold-fill);font-weight:600}
+.tools{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.search{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:0 14px;min-height:40px;font:inherit;font-size:.9rem;width:170px;outline:none}
+.search:focus{border-color:var(--gold-fill)}
+.icon,.lang{height:40px;border-radius:999px;background:transparent;border:1px solid var(--line);color:var(--ink);cursor:pointer;font:inherit;transition:background .2s,border-color .2s}
+.icon{width:40px;display:grid;place-items:center;font-size:1rem}
+.lang{padding:0 16px;font-weight:600;font-size:.9rem}
+.icon:hover,.lang:hover{border-color:var(--gold-fill);background:var(--surface)}
+.menu-btn{display:none}
+
+/* ===== 4. HERO ===== */
+.hero{padding:22px 0 8px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.3fr);gap:34px;align-items:center;background:linear-gradient(135deg,var(--hero-bg),var(--hero-bg2));color:var(--hero-ink);border-radius:14px;padding:clamp(22px,3.4vw,40px);width:calc(100% - 32px);max-width:1208px;overflow:hidden}
+.eyebrow{font-size:.95rem;color:var(--gold-fill);font-weight:600;letter-spacing:.02em}
+.hero h1{font-size:clamp(2rem,3.7vw,3.1rem);line-height:1.08;margin:10px 0 16px;max-width:560px;text-wrap:balance;color:var(--hero-ink)}
+.hero p{max-width:46ch;color:var(--hero-mute);margin-bottom:26px;font-size:1.04rem}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.hero .btn.line{color:var(--hero-ink);border-color:rgba(255,255,255,.4)}
+.hero .btn.line:hover{border-color:var(--gold-fill);background:transparent}
+.hero-img{position:relative}
+
+.hero-img img{position:relative;z-index:1;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--plate)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:6px;font:inherit;font-weight:600;font-size:.95rem;cursor:pointer;border:1px solid var(--gold-fill);transition:filter .2s,background .2s,border-color .2s,color .2s}
+.btn.fill{background:var(--gold-fill);color:var(--on-gold)}
+.btn.fill:hover{filter:brightness(1.07)}
+.btn.line{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.line:hover{border-color:var(--gold-fill)}
+
+/* ===== 5. MAIN ===== */
+.main{display:grid;grid-template-columns:1fr 310px;gap:44px;padding-top:44px;padding-bottom:64px}
+.head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 18px;gap:12px}
+.head h2{font-size:1.65rem;line-height:1.2}
+.head p{font-size:.92rem;color:var(--muted);margin-top:2px}
+.head a{font-size:.9rem;color:var(--accent);font-weight:600;white-space:nowrap;text-decoration:underline;text-underline-offset:4px}
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:52px}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:10px;text-align:center;padding:16px 6px 14px;font-size:.92rem;font-weight:600;line-height:1.3;transition:border-color .2s}
+.cat:hover{border-color:var(--gold-fill)}
+.cat span{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 10px;border-radius:50%;background:var(--plate);font-size:1.6rem;filter:saturate(.7)}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:30px 18px;margin-bottom:56px}
+.prod{display:flex;flex-direction:column;min-width:0}
+.prod .img{aspect-ratio:4/5;position:relative;overflow:hidden;display:grid;place-items:center;font-size:3.4rem;background:var(--plate);border-radius:6px;filter:saturate(.8)}
+.prod .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.prod:hover .img img{transform:scale(1.04)}
+.tag{position:absolute;left:10px;top:10px;z-index:1;background:var(--gold-fill);color:var(--on-gold);font-size:.74rem;font-weight:700;padding:2px 10px;border-radius:4px}
+.prod h3{font-size:1.18rem;line-height:1.25;margin:14px 0 6px;flex:1;text-wrap:balance}
+.price{font-weight:700;font-size:1.35rem;font-variant-numeric:tabular-nums;margin-bottom:2px}
+.stars{color:var(--star);font-size:.85rem;margin-bottom:12px}
+.stars em{color:var(--muted);font-style:normal}
+.prod .btn{width:100%;min-height:42px;background:transparent;color:var(--ink);border-color:var(--line);font-size:.9rem}
+.prod .btn:hover{background:var(--gold-fill);border-color:var(--gold-fill)}
+.bottom{display:grid;grid-template-columns:1fr;gap:18px}
+.bottom.has-review{grid-template-columns:1fr 1fr}
+.gallery{background:linear-gradient(135deg,var(--hero-bg),var(--hero-bg2));color:var(--hero-ink);border-radius:12px;padding:32px}
+.gallery h3{font-size:1.6rem;margin-bottom:6px}
+.gallery p{color:var(--hero-mute)}
+.gallery .btn{margin-top:18px;color:var(--hero-ink);border-color:rgba(255,255,255,.4)}
+.gallery .btn:hover{border-color:var(--gold-fill)}
+.review{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:32px;line-height:1.6}
+.review b{display:block}
+.review>b:first-child{font-family:var(--font-display);font-weight:400;font-size:1.3rem;margin-bottom:4px}
+.review .st{color:var(--star);letter-spacing:2px;margin:4px 0}
+
+/* ===== 6. SIDEBAR ===== */
+.side{position:sticky;top:90px;align-self:start}
+.side>div{border-radius:12px;margin-bottom:16px;padding:24px;border:1px solid var(--line);background:var(--surface)}
+.feature{background:var(--plate)!important}
+.feature small{display:inline-block;background:var(--gold-fill);color:var(--on-gold);padding:1px 10px;border-radius:4px;font-size:.78rem;font-weight:700}
+.feature h3,.custom h3,.fb h3{font-size:1.35rem;line-height:1.25;margin:10px 0 8px}
+.feature p,.custom p{font-size:.93rem;color:var(--muted);margin-bottom:16px}
+.custom p{margin-top:0}
+.side .btn{min-height:42px;font-size:.9rem}
+.trust{display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;font-size:.88rem;text-align:center;line-height:1.35}
+.trust span{display:grid;place-items:center;width:46px;height:46px;margin:0 auto 8px;border-radius:50%;background:var(--plate);font-size:1.3rem;filter:saturate(.7)}
+.fb{background:linear-gradient(160deg,var(--hero-bg),var(--hero-bg2))!important;color:var(--hero-ink);border-color:transparent!important}
+.fb h3{margin-top:0}
+.fb p{font-size:.93rem;color:var(--hero-mute)}
+
+/* ===== 7. FOOTER ===== */
+footer{background:var(--hero-bg);color:var(--hero-mute);font-size:.93rem;padding:44px 0 16px;border-top:3px solid var(--gold-fill)}
+footer .wrap{display:grid;grid-template-columns:2fr 1.5fr 2fr 1.5fr;gap:28px}
+footer h4{font-family:var(--font-display);font-weight:400;color:var(--hero-ink);margin-bottom:12px;font-size:1.15rem}
+footer li{margin-bottom:8px}
+footer a:hover{color:#fff;text-decoration:underline}
+.copy{text-align:center;margin-top:32px;border-top:1px solid rgba(255,255,255,.14);padding-top:16px;font-size:.82rem}
+.wa-float{position:fixed;right:16px;bottom:16px;z-index:30;background:var(--wa);color:#fff;font-weight:600;min-height:48px;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.28)}
+
+/* ===== 8. RESPONSIVE ===== */
+@media(max-width:1700px){.search{display:none}}
+@media(max-width:1440px){.menu-btn{display:grid}nav{flex:none;order:3;width:100%;display:none}header .wrap{flex-wrap:wrap}nav.open{display:block}nav ul{flex-direction:column;padding:6px 0}}
+@media(max-width:1000px){.hero-grid,.main,.bottom,.bottom.has-review{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.side{position:static}footer .wrap{grid-template-columns:1fr 1fr}.hero-img{margin:0}}
+@media(max-width:560px){.logo img{height:46px}.logo-text{padding-left:10px}.hero{padding-top:14px}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px}.prod h3{font-size:1.02rem}.price{font-size:1.15rem}.topbar span:nth-child(2){display:none}.lang{padding:0 12px}footer .wrap{grid-template-columns:1fr}.main{padding-top:32px}.head h2{font-size:1.4rem}}
+
+/* ===== Product card = product page style ===== */
+.prod .pcat{font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.prod h3{font-family:Georgia,'Times New Roman','Hind Siliguri',serif;font-weight:700;font-size:1.05rem;line-height:1.3;margin:4px 0 8px}
+.prod .price{color:var(--brown-dark);font-size:1.25rem;font-weight:700}
+.prod .price .was{color:var(--muted);font-size:.9rem;font-weight:400;text-decoration:line-through;margin-left:8px}
+.pbtns{display:grid;gap:8px}
+.prod h3 a{color:inherit}
+html body .prod .btn.pcart{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;min-height:44px}
+html body .prod .btn.pcart:hover{background:var(--plate);border-color:var(--brown)}
+html[data-theme="dark"] body .prod .btn.pcart{background:#2d221a;color:#f1e6d8;border-color:#4a3a2d}
+html[data-theme="dark"] body .prod .btn.pcart:hover{background:#3a2b22;border-color:#d08a45}
+html body .prod .btn.porder{background:#b87333;color:#fff;border:1px solid #b87333;border-radius:10px;min-height:44px}
+html body .prod .btn.porder:hover{background:#8a5222;border-color:#8a5222;color:#fff}
+.ptoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#22140d;color:#fff;padding:11px 20px;border-radius:999px;font-size:.92rem;z-index:3000;max-width:90vw}
+/* ===== PAYMENT CHIPS + MODAL ===== */
+/* Payment methods (We Accept) */
+.pay{display:flex;flex-wrap:wrap;gap:8px}
+.pay-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);
+  color:#fff;font-size:13px;font-weight:600;letter-spacing:.3px;cursor:default;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .2s,background .2s,border-color .2s,box-shadow .2s}
+.pay-chip i{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 28%,transparent)}
+/* ===== Premium Payment Modal ===== */
+.pay-chip{cursor:pointer}
+.pay-modal-backdrop{position:fixed;inset:0;background:rgba(24,17,13,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9998;opacity:0;visibility:hidden;transition:.22s ease}
+.pay-modal-backdrop.open{opacity:1;visibility:visible}
+.pay-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.97);width:min(440px,calc(100vw - 32px));background:linear-gradient(180deg,#fffdf9,#fff);border:1px solid #ead8c5;border-radius:24px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.35);z-index:9999;opacity:0;visibility:hidden;transition:.22s ease}
+.pay-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+.pay-modal-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+.pay-modal-brand{display:flex;align-items:center;gap:12px}
+.pay-modal-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--pm,#b87333);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.pay-modal h3{margin:0;font-family:Georgia,serif;font-size:24px;color:#2c211b}
+.pay-modal-sub{margin:4px 0 0;color:#806f63;font-size:13px}
+.pay-modal-close{border:0;background:#f5eee7;width:36px;height:36px;border-radius:50%;font-size:24px;cursor:pointer;color:#5e4d42}
+.pay-detail{border:1px solid #ead8c5;border-radius:16px;padding:16px;background:#fffaf4;margin-bottom:14px}
+.pay-detail-label{font-size:12px;color:#8a7668;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.pay-number{font-size:22px;font-weight:800;letter-spacing:.5px;color:#2b211c;margin:6px 0 12px;word-break:break-all}
+.pay-copy{width:100%;border:0;border-radius:12px;background:#2c211b;color:#fff;padding:12px 16px;font-weight:700;cursor:pointer}
+.pay-copy:hover{transform:translateY(-1px);opacity:.94}
+.pay-cod{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;background:#f6f1eb;border-radius:14px;color:#5e5047;font-size:13px;line-height:1.5}
+.pay-cod b{color:#2c211b}
+@media(max-width:520px){.pay-modal{padding:22px;border-radius:20px}.pay-modal h3{font-size:21px}.pay-number{font-size:19px}}
+.pay-chip em{font-style:normal}
+.pay-chip img{display:none;height:26px;width:auto;max-width:90px;object-fit:contain}
+.pay-chip.has-logo{background:#fff;border-color:#fff;padding:7px 14px}
+.pay-chip.has-logo img{display:block}
+.pay-chip.has-logo i,.pay-chip.has-logo em{display:none}
+.pay-chip.has-logo:hover{background:#fff;border-color:var(--c)}
+.pay-chip:hover{transform:translateY(-2px);border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+
+
+/* ===== SOCIAL ===== */
+/* ===== PREMIUM SOCIAL ICONS (top bar) ===== */
+.social-top{display:flex;align-items:center;gap:8px}
+.soc{display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 9px;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12.5px;font-weight:600;transition:transform .25s ease,background .25s ease,border-color .25s ease,box-shadow .25s ease}
+.soc svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
+.soc:hover{transform:translateY(-2px) scale(1.07);text-decoration:none!important;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.soc.fb-i:hover{background:#1877f2;border-color:#1877f2}
+.soc.ig-i:hover{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);border-color:transparent}
+.soc.tt-i:hover{background:#000;border-color:#25f4ee;box-shadow:3px 3px 0 #fe2c55}
+@media(max-width:560px){.soc span{display:none}.soc{padding:7px}}
+.fb.ig .btn{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border-color:transparent;color:#fff}
+.fb.tt .btn{background:#000;border-color:#25f4ee;color:#fff;box-shadow:3px 3px 0 #fe2c55}
+.social-row{display:flex;gap:12px;margin-top:20px}
+.soc-btn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);transition:transform .25s ease,background .25s ease,border-color .25s ease}
+.soc-btn svg{width:20px;height:20px;fill:#fff}
+.soc-btn:hover{transform:translateY(-4px)}
+.soc-btn.f:hover{background:#1877f2;border-color:#1877f2}
+.soc-btn.i:hover{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);border-color:transparent}
+.soc-btn.t:hover{background:#000;border-color:#25f4ee}
+
+</style>
+<link rel="stylesheet" href="theme.css?v=5"><script src="theme.js?v=5"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar"><div class="wrap">
+  <div class="social-top">
+    <a class="soc fb-i" href="https://www.facebook.com/share/1FZzyT7ius/" target="_blank" rel="noopener" aria-label="Facebook">
+      <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      <span>Facebook</span>
+    </a>
+    <a class="soc ig-i" href="https://www.instagram.com/YOUR_USERNAME" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.351-.2 6.78-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      <span>Instagram</span>
+    </a>
+    <a class="soc tt-i" href="https://www.tiktok.com/@YOUR_USERNAME" target="_blank" rel="noopener" aria-label="TikTok">
+      <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+      <span>TikTok</span>
+    </a>
+  </div>
+  <span>Quality Furniture | Custom Design | Trusted by Thousands</span>
+  <span><a href="tel:+8801714000349">📞 +880 1714-000349</a> &nbsp; <a href="https://wa.me/8801714000349">💬 Chat on WhatsApp</a></span>
+</div></div>
+
+<!-- HEADER -->
+<header><div class="wrap">
+  <a href="#" class="logo">
+    <img src="Logo.png" alt="Inaya's Wardrobe logo">
+    <div class="logo-text">
+      <strong>INAYA'S WARDROBE</strong>
+    </div>
+  </a>
+  <nav id="nav" aria-label="Main menu"><ul>
+    <li><a class="active" href="#">Home</a></li><li><a href="#">Shop</a></li>
+    <li><a href="#">Wardrobe</a></li><li><a href="#">Bedroom</a></li>
+    <li><a href="#">Living Room</a></li><li><a href="#">Dining</a></li>
+    <li><a href="#">Gallery</a></li><li><a href="#">About Us</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul></nav>
+  <div class="tools">
+    <button class="lang" id="langBtn" type="button" title="Change language">বাংলা</button>
+    <input class="search" type="search" placeholder="Search for furniture..." aria-label="Search">
+    <button class="icon" id="accountBtn" aria-label="Account" aria-expanded="false" title="Account">👤</button>
+    <button class="icon" id="wishlistBtn" aria-label="Wishlist" title="Wishlist">♡</button>
+    <button class="icon" id="cartBtn" aria-label="Cart" title="Cart">🛒</button>
+    <button class="icon menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+  </div>
+</div></header>
+<div class="ticker" aria-label="Highlights"><div class="tick-in"><span>Premium Quality</span><span>Custom Design</span><span>On-Time Delivery</span><span>Customer Support</span><span>Cash on Delivery available</span><span>Pay with bKash, Nagad, Rocket or bank</span><span aria-hidden="true">Premium Quality</span><span aria-hidden="true">Custom Design</span><span aria-hidden="true">On-Time Delivery</span><span aria-hidden="true">Customer Support</span><span aria-hidden="true">Cash on Delivery available</span><span aria-hidden="true">Pay with bKash, Nagad, Rocket or bank</span></div></div>
+
+<!-- HERO -->
+<section class="hero"><div class="wrap hero-grid">
+  <div class="hero-text">
+    <div class="eyebrow">Premium furniture collection</div>
+    <h1>Transform Your Space with Timeless Elegance.</h1>
+    <p>Discover high-quality furniture and custom wardrobe solutions designed to make your home more beautiful, functional and uniquely yours.</p>
+    <div class="hero-btns">
+      <a class="btn fill" href="#products">Explore Collection →</a>
+      <a class="btn line" href="https://wa.me/8801714000349">Customize Your Wardrobe</a>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="cover-photo.jpg" fetchpriority="high" decoding="async" width="1240" height="930" alt="Inaya's Wardrobe - premium wooden furniture: sofa, table, bed, dining set and wardrobe">
+  </div>
+</div></section>
+
+<!-- MAIN -->
+<div class="wrap main">
+  <div>
+    <div class="head"><div><h2>Shop By Category</h2><p>Find the perfect piece for every corner of your home.</p></div><a href="#">View All →</a></div>
+    <div class="cats">
+      <a class="cat" href="#"><span>🚪</span>Wardrobe</a>
+      <a class="cat" href="#"><span>🛏️</span>Bedroom</a>
+      <a class="cat" href="#"><span>🛋️</span>Living Room</a>
+      <a class="cat" href="#"><span>🍽️</span>Dining</a>
+      <a class="cat" href="#"><span>🗄️</span>Storage</a>
+      <a class="cat" href="#"><span>📐</span>Custom Furniture</a>
+    </div>
+
+    <div class="head" id="products"><div><h2>Best Selling Products</h2><p>Top picks loved by our customers.</p></div><a href="#">View All →</a></div>
+    <div class="products">
+      <!-- Chobi dite chaile: <div class="img"><img src="wardrobe1.jpg" alt="..."></div> -->
+      <article class="prod"><div class="img">🚪<span class="tag">Popular</span></div><h3>3 Door Wardrobe (Modern)</h3><div class="price">৳ 28,000</div><div class="stars">★ 4.8 <em>(124)</em></div><a class="btn fill" href="#">View Details →</a></article>
+      <article class="prod"><div class="img">🗄️<span class="tag">Bestseller</span></div><h3>Sliding Door Wardrobe</h3><div class="price">৳ 35,000</div><div class="stars">★ 4.9 <em>(98)</em></div><a class="btn fill" href="#">View Details →</a></article>
+      <article class="prod"><div class="img">🛏️</div><h3>Queen Size Bed</h3><div class="price">৳ 22,000</div><div class="stars">★ 4.7 <em>(76)</em></div><a class="btn fill" href="#">View Details →</a></article>
+      <article class="prod"><div class="img">🪞</div><h3>Dressing Table</h3><div class="price">৳ 12,500</div><div class="stars">★ 4.6 <em>(54)</em></div><a class="btn fill" href="#">View Details →</a></article>
+      <article class="prod"><div class="img">🛋️<span class="tag">New</span></div><h3>L-Shape Sofa</h3><div class="price">৳ 32,000</div><div class="stars">★ 4.8 <em>(67)</em></div><a class="btn fill" href="#">View Details →</a></article>
+    </div>
+
+    <div class="bottom">
+      <div class="gallery"><h3>Our Gallery</h3><p>See how our furniture looks in real homes.</p><a class="btn line" href="#">View Gallery →</a></div>
+      <div class="review" id="reviewBox" hidden></div>
+    </div>
+  </div>
+
+  <aside class="side">
+    <div class="feature"><small>New feature</small><h3>3D View &amp; Customization</h3><p>Explore our furniture in 3D, change colors, and customize your perfect design.</p><a class="btn fill" href="#">Try 3D View →</a></div>
+
+    <div class="custom"><h3>Need a Custom Design?</h3><p>Your size. Your style. Your choice.</p><a class="btn fill" href="https://wa.me/8801714000349">Request a Quote →</a></div>
+
+    <div class="trust"><div><span>🛡️</span>Premium Quality</div><div><span>🏷️</span>Affordable Price</div><div><span>🚚</span>On-Time Delivery</div><div><span>🎧</span>Customer Support</div></div>
+
+    <div class="fb">
+      <h3>Follow Us</h3>
+      <p>Get the latest updates, new arrivals &amp; exclusive offers.</p>
+      <div class="social-row">
+        <a class="soc-btn f" href="https://www.facebook.com/share/1FZzyT7ius/" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a class="soc-btn i" href="https://www.instagram.com/YOUR_USERNAME" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.351-.2 6.78-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a class="soc-btn t" href="https://www.tiktok.com/@YOUR_USERNAME" target="_blank" rel="noopener" aria-label="TikTok">
+          <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+</div>
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div><h4>INAYA'S WARDROBE</h4>Elegance Crafted for Your Home.</div>
+    <div><h4>Quick Links</h4><ul><li><a href="#">Home</a></li><li><a href="#">Shop</a></li><li><a href="#">About Us</a></li><li><a href="#">Contact</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
+    <div><h4>Contact Us</h4><ul><li><a href="tel:+8801714000349">📞 +880 1714-000349</a></li><li><a href="https://wa.me/8801714000349">💬 Chat on Messenger / WhatsApp</a></li><li>📍 Pangsha-Rajbari, Bangladesh</li></ul></div>
+    <div><h4>We Accept</h4>
+      <div class="pay">
+        <span class="pay-chip" data-pay="bKash" data-number="01714000350" style="--c:#e2136e"><img src="payments/bkash.png" alt="bKash" loading="lazy" onload="this.parentNode.classList.add('has-logo')" onerror="this.remove()"><i></i><em>bKash</em></span>
+        <span class="pay-chip" data-pay="Nagad" data-number="01714000350" style="--c:#f7941d"><img src="payments/nagad.png" alt="Nagad" loading="lazy" onload="this.parentNode.classList.add('has-logo')" onerror="this.remove()"><i></i><em>Nagad</em></span>
+        <span class="pay-chip" data-pay="Rocket" data-number="017140003504" style="--c:#a64ca6"><img src="payments/rocket.png" alt="Rocket" loading="lazy" onload="this.parentNode.classList.add('has-logo')" onerror="this.remove()"><i></i><em>Rocket</em></span>
+        <span class="pay-chip" data-pay="IBBL" data-number="20503900200723012" style="--c:#2e9e5b"><img src="payments/ibbl.png" alt="IBBL" loading="lazy" onload="this.parentNode.classList.add('has-logo')" onerror="this.remove()"><i></i><em>IBBL</em></span>
+      </div>
+    </div>
+  </div>
+  <div class="copy">© 2026 INAYA'S WARDROBE. All rights reserved.</div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/8801714000349" aria-label="Chat on Messenger / WhatsApp">💬 WhatsApp</a>
+
+<script>
+  var btn=document.getElementById('menuBtn'),nav=document.getElementById('nav');
+  btn.addEventListener('click',function(){
+    var open=nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+  });
+</script>
+
+<script src="Admin-Panel/firebase-config.js"></script>
+<script type="module">
+/* Firestore offline cache: dwitiyo visit theke data browser theke shonge shonge ashe */
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+try{const c=window.FIREBASE_CONFIG;if(c&&!String(c.apiKey).startsWith("PASTE"))initializeFirestore(initializeApp(c),{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){console.warn("Cache off:",e)}
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,collection,getDocs,getDocsFromCache,query,orderBy} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+(async()=>{
+  try{
+    const cfg=window.FIREBASE_CONFIG;
+    if(!cfg||String(cfg.apiKey).startsWith("PASTE"))return;
+    const db=getFirestore(initializeApp(cfg));
+    const q=query(collection(db,"products"),orderBy("createdAt","desc"));
+    let last="";
+    const render=snap=>{
+      if(snap.empty)return;
+      const sig=snap.docs.map(d=>{const p=d.data();return [d.id,p.name,p.price,p.tag,p.rating,p.reviews,p.cat,p.old,(p.image||"").length,(p.thumb||"").length].join("~")}).join("|");
+      if(sig===last)return; last=sig;
+      const box=document.querySelector(".products");
+      box.innerHTML="";
+      snap.forEach(d=>{
+        const p=d.data();
+        const img=(p.thumb||p.image)?'<img src="'+(p.thumb||p.image)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async">':"🛋️";
+        box.insertAdjacentHTML("beforeend",
+          '<article class="prod"><a class="img" href="product.html?id='+d.id+'">'+img+(p.tag?'<span class="tag">'+esc(p.tag)+'</span>':'')+'</a>'+
+          (p.cat?'<div class="pcat">'+esc(p.cat)+'</div>':'')+'<h3><a href="product.html?id='+d.id+'">'+esc(p.name)+'</a></h3><div class="price">৳ '+Number(p.price).toLocaleString("en-US")+(Number(p.old)>Number(p.price)?'<span class="was">৳ '+Number(p.old).toLocaleString("en-US")+'</span>':'')+'</div>'+
+          '<div class="stars">★ '+esc(p.rating)+' <em>('+esc(p.reviews)+')</em></div>'+
+          '<div class="pbtns"><button type="button" class="btn line pcart" data-id="'+d.id+'" data-name="'+esc(p.name)+'" data-price="'+Number(p.price)+'">Add to cart</button><button type="button" class="btn fill porder" data-id="'+d.id+'" data-name="'+esc(p.name)+'" data-price="'+Number(p.price)+'">Order now</button></div></article>');
+      });
+    };
+    try{render(await getDocsFromCache(q))}catch(e){}
+    render(await getDocs(q));
+  }catch(e){console.warn("Products load hoy ni:",e)}
+})();
+</script>
+<!-- index.html er </body> er thik age paste korun (ager products snippet er pore) -->
+<script src="Admin-Panel/firebase-config.js"></script>
+<script type="module">
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,getDoc,getDocFromCache} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+(async()=>{
+  try{
+    const cfg=window.FIREBASE_CONFIG;
+    if(!cfg||String(cfg.apiKey).startsWith("PASTE"))return;
+    const app=getApps().length?getApps()[0]:initializeApp(cfg);
+    const ref=doc(getFirestore(app),"settings","site");
+    const set=s=>{const h=s&&s.exists()&&s.data().hero;const img=document.querySelector(".hero-img img");if(h&&img&&img.src!==h){img.removeAttribute("srcset");img.src=h}};
+    try{set(await getDocFromCache(ref))}catch(e){}
+    set(await getDoc(ref));
+  }catch(e){console.warn("Hero load hoy ni:",e)}
+})();
+</script>
+<!-- index.html er </body> er thik age paste korun (ager snippet gulor pore) -->
+<script src="Admin-Panel/firebase-config.js"></script>
+<script src="Admin-Panel/site-content.js"></script>
+<script type="module">
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,collection,getDocs,getDocsFromCache,query,orderBy,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+(async()=>{
+  window.applySite&&window.applySite();
+  const cfg=window.FIREBASE_CONFIG;
+  if(!cfg||String(cfg.apiKey).startsWith("PASTE"))return;
+  const db=getFirestore(getApps().length?getApps()[0]:initializeApp(cfg));
+  const sref=collection(db,"settings");
+  const applyAll=snap=>{const t={},imgs={};snap.forEach(d=>{
+    if(d.id==="site")Object.assign(t,d.data().t||{});
+    else if(d.id.startsWith("img-"))imgs[d.id.slice(4)]=d.data().data;
+  });window.applySite(t,imgs)};
+  try{applyAll(await getDocsFromCache(sref))}catch(e){}
+  try{applyAll(await getDocs(sref))}catch(e){console.warn("Site content load hoy ni:",e)}
+
+  /* ---- Customer reviews: realtime (admin e add/delete korle sathe sathe dekhabe) ---- */
+  const box=document.getElementById("reviewBox"),bottom=document.querySelector(".bottom");
+  let timer=null,idx=0;
+  const mk=(tag,txt,cls)=>{const e=document.createElement(tag);e.textContent=txt;if(cls)e.className=cls;return e};
+  function renderReviews(list){
+    if(timer){clearInterval(timer);timer=null}
+    if(!box||!bottom)return;
+    if(!list.length){box.hidden=true;bottom.classList.remove("has-review");box.replaceChildren();return}
+    bottom.classList.add("has-review");box.hidden=false;
+    const show=()=>{
+      const r=list[idx++%list.length];
+      const n=Math.max(1,Math.min(5,Number(r.stars)||5));
+      box.replaceChildren(mk("b","What Our Customers Say"),mk("div","★".repeat(n),"st"),mk("b",r.name||""),document.createTextNode("\""+(r.text||"")+"\""));
+    };
+    idx=0;show();
+    if(list.length>1)timer=setInterval(show,6000);
+  }
+  window.renderReviews=renderReviews;
+  try{
+    onSnapshot(query(collection(db,"reviews"),orderBy("createdAt","desc")),
+      snap=>renderReviews(snap.docs.map(d=>d.data())),
+      err=>{console.warn("Reviews load hoy ni:",err);renderReviews([])});
+  }catch(e){console.warn("Reviews load hoy ni:",e)}
+})();
+</script>
+
+<!-- Premium payment details modal -->
+<div class="pay-modal-backdrop" id="payModalBackdrop" aria-hidden="true"></div>
+<div class="pay-modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payModalTitle" aria-hidden="true">
+  <div class="pay-modal-head">
+    <div class="pay-modal-brand">
+      <div class="pay-modal-icon" id="payModalIcon">৳</div>
+      <div><h3 id="payModalTitle">Payment</h3><p class="pay-modal-sub">INAYA'S WARDROBE</p></div>
+    </div>
+    <button class="pay-modal-close" id="payModalClose" aria-label="Close">×</button>
+  </div>
+  <div class="pay-detail">
+    <div class="pay-detail-label" id="payDetailLabel">Payment Number</div>
+    <div class="pay-number" id="payNumber">—</div>
+    <button class="pay-copy" id="payCopy">Copy Number</button>
+  </div>
+  <div class="pay-cod"><span>✓</span><div><b>Cash on Delivery available</b><br>You can also place your order and pay when the product is delivered.</div></div>
+</div>
+<script>
+(function(){
+  const backdrop=document.getElementById('payModalBackdrop');
+  const modal=document.getElementById('payModal');
+  const closeBtn=document.getElementById('payModalClose');
+  const title=document.getElementById('payModalTitle');
+  const icon=document.getElementById('payModalIcon');
+  const number=document.getElementById('payNumber');
+  const copy=document.getElementById('payCopy');
+  const open=(name,num,color)=>{
+    title.textContent=name+' Payment'; icon.style.setProperty('--pm',color||'#b87333');
+    number.textContent=/^\d{12}$/.test(num)?num.slice(0,11)+'-'+num.slice(11):num;
+    document.getElementById('payDetailLabel').textContent=/^\d{11,12}$/.test(num)?'Payment Number':'Account Number';
+    modal.classList.add('open'); backdrop.classList.add('open'); modal.setAttribute('aria-hidden','false'); backdrop.setAttribute('aria-hidden','false');
+    closeBtn.focus();
+  };
+  const close=()=>{modal.classList.remove('open');backdrop.classList.remove('open');modal.setAttribute('aria-hidden','true');backdrop.setAttribute('aria-hidden','true')};
+  document.querySelectorAll('.pay-chip[data-pay]').forEach(el=>el.addEventListener('click',()=>open(el.dataset.pay,el.dataset.number,getComputedStyle(el).getPropertyValue('--c'))));
+  copy.addEventListener('click',async()=>{
+    const raw=number.textContent.replace(/[^0-9]/g,'');
+    try{await navigator.clipboard.writeText(raw);copy.textContent='✓ Copied';setTimeout(()=>copy.textContent='Copy Number',1400)}catch(e){copy.textContent='Copy failed';setTimeout(()=>copy.textContent='Copy Number',1400)}
+  });
+  closeBtn.addEventListener('click',close); backdrop.addEventListener('click',close);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+})();
+</script>
+<script src="lang.js?v=1" defer></script>
+<script>
+/* Homepage card: Add to cart / Order now (main.js-er cart-er sathe ek-i localStorage "cart") */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.pcart,.porder');if(!b)return;
+  var c=[];try{c=JSON.parse(localStorage.getItem('cart'))||[]}catch(_){}
+  var id=b.dataset.id,f=c.find(function(i){return i.id===id});
+  f?f.qty++:c.push({id:id,name:b.dataset.name,price:Number(b.dataset.price),qty:1});
+  try{localStorage.setItem('cart',JSON.stringify(c))}catch(_){}
+  window.dispatchEvent(new Event('inaya-cart'));
+  if(b.classList.contains('porder')){location.href='shop.html?cart=1';return}
+  var t=document.createElement('div');t.className='ptoast';
+  t.textContent=document.documentElement.lang==='bn'?b.dataset.name+' কার্টে যোগ হয়েছে':b.dataset.name+' added to cart';
+  document.body.appendChild(t);setTimeout(function(){t.remove()},1800);
+});
+</script>
+<script src="header-ui.js?v=5"></script>
+</body>
+</html>
