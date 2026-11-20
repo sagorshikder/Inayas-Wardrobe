@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "npx tsx server.ts",
     "start": "node server.ts",
+    "start:tsx": "tsx server.ts",
     "build": "vite build",
+    "db:check": "tsx src/db/check.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

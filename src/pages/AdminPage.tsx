@@ -49,7 +49,7 @@ interface InquiryDoc {
   createdAt?: string;
 }
 
-function compressImageFile(file: File, maxDim = 960, quality = 0.8): Promise<string> {
+function compressImageToWebp(file: File, maxDim = 960, quality = 0.8): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -67,8 +67,8 @@ function compressImageFile(file: File, maxDim = 960, quality = 0.8): Promise<str
           return;
         }
         ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
+        const webpUrl = canvas.toDataURL('image/webp', quality);
+        resolve(webpUrl.startsWith('data:image/webp') ? webpUrl : canvas.toDataURL('image/jpeg', quality));
       };
       img.onerror = () => reject(new Error('Could not decode image'));
       img.src = String(reader.result);
@@ -102,10 +102,11 @@ export function AdminPage() {
 
   // Auth form state
   const [hasAdmin, setHasAdmin] = useState(true);
-  const [adminEmailHint, setAdminEmailHint] = useState('sagorshikder707@gmail.com');
-  const [loginEmail, setLoginEmail] = useState('sagorshikder707@gmail.com');
+  const [setupTokenRequired, setSetupTokenRequired] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginConfirm, setLoginConfirm] = useState('');
+  const [setupToken, setSetupToken] = useState('');
   const [authSubmitting, setAuthSubmitting] = useState(false);
 
   // Product editor state
@@ -143,13 +144,10 @@ export function AdminPage() {
   useEffect(() => {
     fetch('/api/auth/status')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { hasAdmin?: boolean; adminEmail?: string } | null) => {
+      .then((data: { hasAdmin?: boolean; setupTokenRequired?: boolean } | null) => {
         if (data) {
           setHasAdmin(Boolean(data.hasAdmin));
-          if (data.adminEmail) {
-            setAdminEmailHint(data.adminEmail);
-            setLoginEmail(data.adminEmail);
-          }
+          setSetupTokenRequired(Boolean(data.setupTokenRequired));
         }
       })
       .catch(() => {
@@ -215,17 +213,36 @@ export function AdminPage() {
     setPThumb('');
   };
 
+  const uploadWebpAsset = async (
+    file: File,
+    maxDim: number,
+    quality: number,
+    prefix: string,
+  ): Promise<string> => {
+    const dataUrl = await compressImageToWebp(file, maxDim, quality);
+    const res = (await adminFetch('/api/admin/upload', {
+      method: 'POST',
+      body: JSON.stringify({ dataUrl, prefix }),
+    })) as { url?: string };
+    if (!res.url) {
+      throw new Error('Upload succeeded without returning image URL');
+    }
+    return res.url;
+  };
+
   const handleProductImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const full = await compressImageFile(file, 960, 0.8);
-      const thumb = await compressImageFile(file, 420, 0.72);
-      setPImage(full);
-      setPThumb(thumb);
-      showToast('Photo prepared');
-    } catch {
-      showToast('Could not process image');
+      const [fullUrl, thumbUrl] = await Promise.all([
+        uploadWebpAsset(file, 960, 0.8, 'prod'),
+        uploadWebpAsset(file, 420, 0.74, 'thumb'),
+      ]);
+      setPImage(fullUrl);
+      setPThumb(thumbUrl);
+      showToast('WebP photo uploaded');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Could not process image');
     }
   };
 
@@ -347,11 +364,11 @@ export function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const compressed = await compressImageFile(file, 1024, 0.8);
-      setGImage(compressed);
-      showToast('Gallery photo ready');
-    } catch {
-      showToast('Could not decode photo');
+      const uploadedUrl = await uploadWebpAsset(file, 1024, 0.8, 'gallery');
+      setGImage(uploadedUrl);
+      showToast('Gallery WebP photo uploaded');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Could not decode photo');
     }
   };
 
@@ -451,13 +468,18 @@ export function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const compressed = await compressImageFile(file, slotKey === 'hero' ? 1280 : 600, 0.8);
+      const uploadedUrl = await uploadWebpAsset(
+        file,
+        slotKey === 'hero' ? 1280 : 600,
+        0.8,
+        `site-${slotKey}`,
+      );
       await adminFetch(`/api/admin/settings/image/${encodeURIComponent(slotKey)}`, {
         method: 'PUT',
-        body: JSON.stringify({ data: compressed }),
+        body: JSON.stringify({ data: uploadedUrl }),
       });
       await refreshCatalog();
-      showToast('Site image updated');
+      showToast('Site WebP image updated');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Could not update image');
     }
@@ -469,6 +491,10 @@ export function AdminPage() {
       showToast('Enter your email and password');
       return;
     }
+    if (!hasAdmin && loginPassword.length < 8) {
+      showToast('Password must be at least 8 characters');
+      return;
+    }
     if (!hasAdmin && loginPassword !== loginConfirm) {
       showToast('Passwords do not match');
       return;
@@ -476,7 +502,12 @@ export function AdminPage() {
     setAuthSubmitting(true);
     try {
       if (!hasAdmin) {
-        await setupAdminAccount(loginEmail.trim(), loginPassword, 'Store Owner');
+        await setupAdminAccount(
+          loginEmail.trim(),
+          loginPassword,
+          'Store Owner',
+          setupToken.trim() || undefined,
+        );
         setHasAdmin(true);
         showToast('Admin password configured');
       } else {
@@ -485,6 +516,7 @@ export function AdminPage() {
       }
       setLoginPassword('');
       setLoginConfirm('');
+      setSetupToken('');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
@@ -511,8 +543,7 @@ export function AdminPage() {
           {user && !isAdmin ? (
             <div className="text-center">
               <p className="text-sm text-[#6a584b] dark:text-[#b8a898] mb-5">
-                Signed in as <strong>{user.email}</strong>. Store management requires the verified
-                owner account ({adminEmailHint}).
+                Signed in as <strong>{user.email}</strong>. Store management requires an administrator account.
               </p>
               <button
                 type="button"
@@ -527,7 +558,7 @@ export function AdminPage() {
               <p className="text-sm text-[#6a584b] dark:text-[#b8a898] text-center">
                 {hasAdmin
                   ? 'Sign in with your administrator email and password to manage products, orders, inquiries, and site content.'
-                  : `Create the owner password for ${adminEmailHint} to unlock your MySQL Admin Studio.`}
+                  : 'Create the store administrator account to unlock your MySQL Admin Studio.'}
               </p>
 
               <div>
@@ -537,6 +568,7 @@ export function AdminPage() {
                   required
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="admin@yourdomain.com"
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
                 />
               </div>
@@ -546,27 +578,42 @@ export function AdminPage() {
                 <input
                   type="password"
                   required
-                  minLength={6}
+                  minLength={hasAdmin ? 1 : 8}
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Minimum 6 characters"
+                  placeholder={hasAdmin ? 'Enter password' : 'Minimum 8 characters'}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
                 />
               </div>
 
               {!hasAdmin && (
-                <div>
-                  <label className="block text-xs font-semibold mb-1">Confirm Password</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={loginConfirm}
-                    onChange={(e) => setLoginConfirm(e.target.value)}
-                    placeholder="Re-enter password"
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Confirm Password</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={loginConfirm}
+                      onChange={(e) => setLoginConfirm(e.target.value)}
+                      placeholder="Re-enter password"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
+                    />
+                  </div>
+                  {setupTokenRequired && (
+                    <div>
+                      <label className="block text-xs font-semibold mb-1">Setup Token</label>
+                      <input
+                        type="password"
+                        required
+                        value={setupToken}
+                        onChange={(e) => setSetupToken(e.target.value)}
+                        placeholder="ADMIN_SETUP_TOKEN from server .env"
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm"
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               <button
@@ -1146,6 +1193,9 @@ export function AdminPage() {
                   ['hero_text', 'Hero Subtitle'],
                   ['phone', 'Phone Number'],
                   ['wa', 'WhatsApp Digits (880...)'],
+                  ['pay_bkash_nagad', 'bKash / Nagad Number'],
+                  ['pay_rocket', 'Rocket (DBBL) Number'],
+                  ['pay_ibbl', 'Islami Bank (IBBL) Account'],
                   ['address', 'Showroom Address'],
                   ['tagline', 'Top Ticker Tagline'],
                   ['foot_text', 'Footer Tagline'],

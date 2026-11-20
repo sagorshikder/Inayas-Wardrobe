@@ -1,29 +1,30 @@
-import catWardrobe from '../assets/images/cat_wardrobe_1795141550017.jpg';
-import catBedroom from '../assets/images/cat_bedroom_1795141549958.jpg';
-import catLivingRoom from '../assets/images/cat_living_room_1795141550410.jpg';
-import catDining from '../assets/images/cat_dining_1795141551827.jpg';
-import catStorage from '../assets/images/cat_storage_1795141550714.jpg';
-import catCustomFurniture from '../assets/images/cat_custom_furniture_1795141550732.jpg';
-import catDressingTable from '../assets/images/cat_dressing_table_1795141568779.jpg';
-import catStudyTable from '../assets/images/cat_study_table_1795141568750.jpg';
-import catTvCabinet from '../assets/images/cat_tv_cabinet_1795141571064.jpg';
-import catCoffeeTable from '../assets/images/cat_coffee_table_1795141571357.jpg';
-import catShoeRack from '../assets/images/cat_shoe_rack_1795141570729.jpg';
-import catBookshelf from '../assets/images/cat_bookshelf_1795141570974.jpg';
+import catWardrobe from '../assets/images/cat_wardrobe_1795141550017.webp';
+import catBedroom from '../assets/images/cat_bedroom_1795141549958.webp';
+import catLivingRoom from '../assets/images/cat_living_room_1795141550410.webp';
+import catDining from '../assets/images/cat_dining_1795141551827.webp';
+import catStorage from '../assets/images/cat_storage_1795141550714.webp';
+import catCustomFurniture from '../assets/images/cat_custom_furniture_1795141550732.webp';
+import catDressingTable from '../assets/images/cat_dressing_table_1795141568779.webp';
+import catStudyTable from '../assets/images/cat_study_table_1795141568750.webp';
+import catTvCabinet from '../assets/images/cat_tv_cabinet_1795141571064.webp';
+import catCoffeeTable from '../assets/images/cat_coffee_table_1795141571357.webp';
+import catShoeRack from '../assets/images/cat_shoe_rack_1795141570729.webp';
+import catBookshelf from '../assets/images/cat_bookshelf_1795141570974.webp';
 
-import galleryWatermark from '../assets/images/gallery_watermark_1795141805943.jpg';
-import feature3dBg from '../assets/images/feature_3d_bg_1795142419466.jpg';
-import customDesignBg from '../assets/images/custom_design_bg_1795143367170.jpg';
-import followUsBg from '../assets/images/follow_us_bg_1795145731231.jpg';
+import galleryWatermark from '../assets/images/gallery_watermark_1795141805943.webp';
+import feature3dBg from '../assets/images/feature_3d_bg_1795142419466.webp';
+import customDesignBg from '../assets/images/custom_design_bg_1795143367170.webp';
+import followUsBg from '../assets/images/follow_us_bg_1795145731231.webp';
 
-import trustQuality from '../assets/images/trust_quality_1795143497714.jpg';
-import trustPrice from '../assets/images/trust_price_1795143498196.jpg';
-import trustDelivery from '../assets/images/trust_delivery_1795143498898.jpg';
+import trustQuality from '../assets/images/trust_quality_1795143497714.webp';
+import trustPrice from '../assets/images/trust_price_1795143498196.webp';
+import trustDelivery from '../assets/images/trust_delivery_1795143498898.webp';
+import trustSupportPortrait from '../assets/images/trust_support_portrait.webp';
 
-import prodSlidingWardrobe from '../assets/images/prod_sliding_wardrobe_1795173611483.jpg';
-import prodHingedWardrobe from '../assets/images/prod_hinged_wardrobe_1795173612542.jpg';
-import prodRoyalBed from '../assets/images/prod_royal_bed_1795173611793.jpg';
-import aboutWorkshop from '../assets/images/about_workshop_1795173612517.jpg';
+import prodSlidingWardrobe from '../assets/images/prod_sliding_wardrobe_1795173611483.webp';
+import prodHingedWardrobe from '../assets/images/prod_hinged_wardrobe_1795173612542.webp';
+import prodRoyalBed from '../assets/images/prod_royal_bed_1795173611793.webp';
+import aboutWorkshop from '../assets/images/about_workshop_1795173612517.webp';
 
 export interface ProductRecord {
   id: string;
@@ -83,11 +84,14 @@ export interface SiteTextConfig {
   c_text: string;
   foot_text: string;
   copy: string;
+  pay_bkash_nagad: string;
+  pay_rocket: string;
+  pay_ibbl: string;
 }
 
 export const STUDIO_MEDIA = {
-  logo: '/Logo.png',
-  heroCover: '/cover-photo.jpg',
+  logo: '/Logo.webp',
+  heroCover: '/cover-photo.webp',
   galleryWatermark,
   feature3dBg,
   customDesignBg,
@@ -95,8 +99,8 @@ export const STUDIO_MEDIA = {
   trustQuality,
   trustPrice,
   trustDelivery,
-  // User's static locked customer support portrait from /public/assets/aistudio/
-  trustSupportPortrait: '/assets/aistudio/IMG.jpg_d0184bfc.jpeg',
+  // Optimized WebP version of the user's customer support portrait
+  trustSupportPortrait,
   aboutWorkshop,
 };
 
@@ -123,6 +127,9 @@ export const DEFAULT_SITE_TEXT: SiteTextConfig = {
   c_text: 'Your size. Your style. Your choice.',
   foot_text: 'Elegance Crafted for Your Home.',
   copy: "© 2026 INAYA'S WARDROBE. All rights reserved.",
+  pay_bkash_nagad: '01714000350',
+  pay_rocket: '017140003504',
+  pay_ibbl: '20503900200723012',
 };
 
 export const STORE_CATEGORIES: CategoryRecord[] = [

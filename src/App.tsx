@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DrawersAndModals } from './components/DrawersAndModals';
 import { Footer } from './components/Footer';
@@ -11,6 +12,22 @@ import { HomePage } from './pages/HomePage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { ShopPage } from './pages/ShopPage';
 import { View3DPage } from './pages/View3DPage';
+import { applySeoToDocument, buildSeoMetadata } from './utils/seo';
+
+function SeoManager() {
+  const { route, products, siteText } = useStore();
+
+  useEffect(() => {
+    const origin =
+      typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : 'https://inayaswardrobe.com';
+    const seo = buildSeoMetadata({ route, products, siteText, origin });
+    applySeoToDocument(seo, origin);
+  }, [route, products, siteText]);
+
+  return null;
+}
 
 function StoreRouter() {
   const { route } = useStore();
@@ -41,6 +58,7 @@ export function App() {
   return (
     <ErrorBoundary>
       <StoreProvider>
+        <SeoManager />
         <div className="min-h-screen flex flex-col overflow-x-clip bg-[#f7f2ea] dark:bg-[#17110d] text-[#22140d] dark:text-[#f1e6d8] transition-colors">
           <Header />
           <div className="flex-1">

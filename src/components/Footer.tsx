@@ -1,6 +1,5 @@
 import { MessageCircle } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import { PAY_BKASH_NAGAD, PAY_IBBL, PAY_ROCKET } from '../utils/commerce';
 
 export function Footer() {
   const { navigate, siteText, t, openPaymentModal } = useStore();
@@ -71,7 +70,7 @@ export function Footer() {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={() => openPaymentModal('bKash', PAY_BKASH_NAGAD, '#e2136e')}
+                onClick={() => openPaymentModal('bKash', siteText.pay_bkash_nagad, '#e2136e')}
                 className="flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.07] border border-white/15 hover:border-[#e2136e] hover:-translate-y-0.5 transition-all text-left cursor-pointer"
               >
                 <span className="w-8 h-6 rounded-md bg-white grid place-items-center p-0.5 shrink-0" aria-hidden="true">
@@ -90,7 +89,7 @@ export function Footer() {
 
               <button
                 type="button"
-                onClick={() => openPaymentModal('Nagad', PAY_BKASH_NAGAD, '#f7941d')}
+                onClick={() => openPaymentModal('Nagad', siteText.pay_bkash_nagad, '#f7941d')}
                 className="flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.07] border border-white/15 hover:border-[#f7941d] hover:-translate-y-0.5 transition-all text-left cursor-pointer"
               >
                 <span className="w-8 h-6 rounded-md bg-white grid place-items-center p-0.5 shrink-0" aria-hidden="true">
@@ -114,7 +113,7 @@ export function Footer() {
 
               <button
                 type="button"
-                onClick={() => openPaymentModal('Rocket', PAY_ROCKET, '#a64ca6')}
+                onClick={() => openPaymentModal('Rocket', siteText.pay_rocket, '#a64ca6')}
                 className="flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.07] border border-white/15 hover:border-[#a64ca6] hover:-translate-y-0.5 transition-all text-left cursor-pointer"
               >
                 <span className="w-8 h-6 rounded-md bg-white grid place-items-center p-0.5 shrink-0" aria-hidden="true">
@@ -134,7 +133,7 @@ export function Footer() {
 
               <button
                 type="button"
-                onClick={() => openPaymentModal('IBBL', PAY_IBBL, '#2e9e5b')}
+                onClick={() => openPaymentModal('IBBL', siteText.pay_ibbl, '#2e9e5b')}
                 className="flex items-center gap-2.5 p-2 rounded-xl bg-white/[0.07] border border-white/15 hover:border-[#2e9e5b] hover:-translate-y-0.5 transition-all text-left cursor-pointer"
               >
                 <span className="w-8 h-6 rounded-md bg-white grid place-items-center p-0.5 shrink-0" aria-hidden="true">

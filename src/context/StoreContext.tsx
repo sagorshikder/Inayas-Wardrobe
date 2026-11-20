@@ -78,7 +78,12 @@ interface StoreContextValue {
   isAdmin: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   registerCustomer: (name: string, email: string, password: string) => Promise<void>;
-  setupAdminAccount: (email: string, password: string, name?: string) => Promise<void>;
+  setupAdminAccount: (
+    email: string,
+    password: string,
+    name?: string,
+    setupToken?: string,
+  ) => Promise<void>;
   signOutUser: () => Promise<void>;
   submitCustomerOrder: (input: {
     name: string;
@@ -145,7 +150,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [paymentModal, setPaymentModal] = useState<PaymentModalState>({
     open: false,
     name: 'bKash',
-    number: '01714000350',
+    number: DEFAULT_SITE_TEXT.pay_bkash_nagad,
     color: '#e2136e',
   });
 
@@ -462,11 +467,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const setupAdminAccount = useCallback(
-    async (email: string, password: string, name?: string) => {
+    async (email: string, password: string, name?: string, setupToken?: string) => {
       const res = await fetch('/api/auth/setup-admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, setupToken }),
       });
       const data = (await res.json()) as {
         error?: string;

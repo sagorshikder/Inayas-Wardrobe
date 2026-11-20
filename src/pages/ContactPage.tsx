@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Check, Copy, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import { PAY_BKASH_NAGAD, PAY_IBBL, PAY_ROCKET } from '../utils/commerce';
+import { isValidBdPhone } from '../utils/commerce';
 
 export function ContactPage() {
   const { siteText, submitContactInquiry, showToast } = useStore();
@@ -18,13 +18,12 @@ export function ContactPage() {
     e.preventDefault();
     setErrorMsg(null);
     const trimmedName = name.trim();
-    const digits = phone.replace(/\D/g, '');
     if (trimmedName.length < 2) {
       setErrorMsg('Please enter your name.');
       return;
     }
-    if (digits.length < 10 || digits.length > 15) {
-      setErrorMsg('Please enter a valid 11-digit phone number.');
+    if (!isValidBdPhone(phone)) {
+      setErrorMsg('Please enter a valid 11-digit BD mobile number (e.g. 017XXXXXXXX).');
       return;
     }
 
@@ -130,9 +129,9 @@ export function ContactPage() {
             <h2 className="font-display text-xl mb-3">Payment Accounts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm">
               {[
-                { label: 'bKash / Nagad', value: PAY_BKASH_NAGAD },
-                { label: 'Rocket (DBBL)', value: PAY_ROCKET },
-                { label: 'Islami Bank (IBBL)', value: PAY_IBBL },
+                { label: 'bKash / Nagad', value: siteText.pay_bkash_nagad },
+                { label: 'Rocket (DBBL)', value: siteText.pay_rocket },
+                { label: 'Islami Bank (IBBL)', value: siteText.pay_ibbl },
               ].map((acc) => (
                 <button
                   key={acc.label}
@@ -218,7 +217,7 @@ export function ContactPage() {
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="01XXXXXXXXX"
+                placeholder="017XXXXXXXX"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm tabular-price"
               />
             </div>

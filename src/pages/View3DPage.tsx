@@ -174,7 +174,7 @@ function makePlinthTexture(maxAniso: number) {
 }
 
 export function View3DPage() {
-  const { theme } = useStore();
+  const { theme, siteText } = useStore();
   const stageRef = useRef<HTMLDivElement>(null);
 
   const [widthFt, setWidthFt] = useState(6);
@@ -857,6 +857,7 @@ export function View3DPage() {
     heightFt,
     finishName: activeFinish.name,
     estimatedTaka: estimatedQuote,
+    waNumber: siteText.wa,
   });
 
   return (

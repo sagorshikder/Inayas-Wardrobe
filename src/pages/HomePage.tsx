@@ -61,6 +61,8 @@ export function HomePage() {
               alt="Inaya's Wardrobe bespoke wooden furniture showcase"
               width={1240}
               height={930}
+              fetchPriority="high"
+              decoding="async"
               referrerPolicy="no-referrer"
               className="w-full aspect-[4/3] object-cover rounded-[26px_8px_26px_8px] border-[1.5px] border-[#cf9a3e]/55 outline outline-1 outline-[#cf9a3e]/25 outline-offset-[5px] shadow-2xl transition-transform duration-500 hover:-translate-y-0.5"
             />
@@ -162,6 +164,8 @@ export function HomePage() {
                 src={STUDIO_MEDIA.galleryWatermark}
                 alt=""
                 aria-hidden="true"
+                loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 className="absolute inset-0 w-full h-full object-cover opacity-30"
               />
@@ -226,6 +230,8 @@ export function HomePage() {
               src={STUDIO_MEDIA.feature3dBg}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-30"
             />
@@ -255,6 +261,8 @@ export function HomePage() {
               src={STUDIO_MEDIA.customDesignBg}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-45"
             />
@@ -339,6 +347,8 @@ export function HomePage() {
               src={STUDIO_MEDIA.followUsBg}
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-50"
             />

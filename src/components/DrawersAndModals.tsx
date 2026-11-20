@@ -5,9 +5,6 @@ import {
   buildCartWhatsAppUrl,
   computeCartSummary,
   formatTaka,
-  PAY_BKASH_NAGAD,
-  PAY_IBBL,
-  PAY_ROCKET,
   type PaymentMethod,
 } from '../utils/commerce';
 
@@ -27,6 +24,7 @@ export function DrawersAndModals() {
     paymentModal,
     closePaymentModal,
     toastMessage,
+    siteText,
     t,
   } = useStore();
 
@@ -183,7 +181,7 @@ export function DrawersAndModals() {
                 {t.placeOrder}
               </button>
               <a
-                href={buildCartWhatsAppUrl(cart)}
+                href={buildCartWhatsAppUrl(cart, siteText.wa)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full py-2.5 rounded-xl border border-[#dccfbe] dark:border-[#3d2f25] text-center text-sm font-semibold hover:border-[#cf9a3e] transition-colors"
@@ -220,33 +218,40 @@ export function DrawersAndModals() {
                 </p>
                 <div className="rounded-xl bg-[#f7f2ea] dark:bg-[#2d221a] p-4 text-left text-xs space-y-2 border border-[#dccfbe] dark:border-[#3d2f25]">
                   <div className="flex items-center justify-between">
-                    <span>bKash / Nagad: <b className="tabular-price">{PAY_BKASH_NAGAD}</b></span>
+                    <span>bKash / Nagad: <b className="tabular-price">{siteText.pay_bkash_nagad}</b></span>
                     <button
                       type="button"
-                      onClick={() => handleCopy(PAY_BKASH_NAGAD)}
+                      onClick={() => handleCopy(siteText.pay_bkash_nagad)}
                       className="px-2.5 py-1 rounded-md border border-[#cf9a3e] font-semibold cursor-pointer"
                     >
-                      {copiedNum === PAY_BKASH_NAGAD ? 'Copied' : 'Copy'}
+                      {copiedNum === siteText.pay_bkash_nagad ? 'Copied' : 'Copy'}
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Rocket: <b className="tabular-price">01714000350-4</b></span>
+                    <span>
+                      Rocket:{' '}
+                      <b className="tabular-price">
+                        {/^\d{12}$/.test(siteText.pay_rocket)
+                          ? `${siteText.pay_rocket.slice(0, 11)}-${siteText.pay_rocket.slice(11)}`
+                          : siteText.pay_rocket}
+                      </b>
+                    </span>
                     <button
                       type="button"
-                      onClick={() => handleCopy(PAY_ROCKET)}
+                      onClick={() => handleCopy(siteText.pay_rocket)}
                       className="px-2.5 py-1 rounded-md border border-[#cf9a3e] font-semibold cursor-pointer"
                     >
-                      {copiedNum === PAY_ROCKET ? 'Copied' : 'Copy'}
+                      {copiedNum === siteText.pay_rocket ? 'Copied' : 'Copy'}
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>IBBL: <b className="tabular-price">{PAY_IBBL}</b></span>
+                    <span>IBBL: <b className="tabular-price">{siteText.pay_ibbl}</b></span>
                     <button
                       type="button"
-                      onClick={() => handleCopy(PAY_IBBL)}
+                      onClick={() => handleCopy(siteText.pay_ibbl)}
                       className="px-2.5 py-1 rounded-md border border-[#cf9a3e] font-semibold cursor-pointer"
                     >
-                      {copiedNum === PAY_IBBL ? 'Copied' : 'Copy'}
+                      {copiedNum === siteText.pay_ibbl ? 'Copied' : 'Copy'}
                     </button>
                   </div>
                 </div>
@@ -302,7 +307,7 @@ export function DrawersAndModals() {
                     required
                     value={ckPhone}
                     onChange={(e) => setCkPhone(e.target.value)}
-                    placeholder="01714-000349"
+                    placeholder="017XXXXXXXX"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#dccfbe] dark:border-[#3d2f25] bg-[#f7f2ea]/40 dark:bg-[#17110d] text-sm tabular-price"
                   />
                 </div>

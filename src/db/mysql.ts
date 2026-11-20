@@ -1,32 +1,76 @@
 import mysql from 'mysql2/promise';
-import type { Pool } from 'mysql2/promise';
+import type { Pool, RowDataPacket } from 'mysql2/promise';
+
+export interface MysqlConnectionConfig {
+  host: string;
+  port: number;
+  socketPath?: string;
+  database: string;
+  user: string;
+  password: string;
+}
 
 let pool: Pool | null = null;
 let schemaInitialized = false;
 
+export function getMysqlConfig(): MysqlConnectionConfig {
+  return {
+    host: process.env.DB_HOST?.trim() || 'localhost',
+    port: Number(process.env.DB_PORT) || 3306,
+    socketPath: process.env.DB_SOCKET?.trim() || undefined,
+    database: process.env.DB_NAME?.trim() || '',
+    user: process.env.DB_USER?.trim() || '',
+    password: process.env.DB_PASSWORD ?? '',
+  };
+}
+
 export function isMysqlConfigured(): boolean {
-  return Boolean(
-    process.env.DB_HOST?.trim() &&
-      process.env.DB_NAME?.trim() &&
-      process.env.DB_USER?.trim(),
-  );
+  const cfg = getMysqlConfig();
+  return Boolean((cfg.host || cfg.socketPath) && cfg.database && cfg.user);
 }
 
 export function getMysqlPool(): Pool {
   if (!pool) {
+    const cfg = getMysqlConfig();
     pool = mysql.createPool({
-      host: process.env.DB_HOST?.trim() || 'localhost',
-      port: Number(process.env.DB_PORT) || 3306,
-      database: process.env.DB_NAME?.trim(),
-      user: process.env.DB_USER?.trim(),
-      password: process.env.DB_PASSWORD ?? '',
+      host: cfg.socketPath ? undefined : cfg.host,
+      port: cfg.socketPath ? undefined : cfg.port,
+      socketPath: cfg.socketPath,
+      database: cfg.database,
+      user: cfg.user,
+      password: cfg.password,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
       charset: 'utf8mb4',
+      timezone: '+06:00',
     });
   }
   return pool;
+}
+
+export async function testMysqlConnection(): Promise<{ database: string; version: string }> {
+  if (!isMysqlConfigured()) {
+    throw new Error('MySQL is not configured. Set DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD in .env.');
+  }
+  const db = getMysqlPool();
+  try {
+    const [rows] = await db.query<RowDataPacket[]>('SELECT DATABASE() AS db, VERSION() AS version');
+    const row = rows[0] || {};
+    return {
+      database: String(row.db || getMysqlConfig().database),
+      version: String(row.version || 'unknown'),
+    };
+  } catch (err) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'ER_ACCESS_DENIED_ERROR') {
+      throw new Error('MySQL access denied: verify DB_USER, DB_PASSWORD, and user privileges in cPanel -> MySQL Databases.');
+    }
+    if (code === 'ER_BAD_DB_ERROR') {
+      throw new Error(`MySQL database "${getMysqlConfig().database}" does not exist or user is not assigned to it.`);
+    }
+    throw err;
+  }
 }
 
 export async function ensureMysqlSchema(): Promise<void> {

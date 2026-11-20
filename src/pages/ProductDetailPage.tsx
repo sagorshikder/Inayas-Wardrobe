@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
-import { formatTaka, WA_NUMBER } from '../utils/commerce';
+import { formatTaka } from '../utils/commerce';
 
 const FINISH_COLORS = ['Walnut Brown', 'Natural Oak', 'Matte White', 'Charcoal Grey'];
 
 export function ProductDetailPage() {
-  const { products, route, navigate, addToCart, openCheckout, wishlist, toggleWishlist, t } =
+  const { products, route, navigate, addToCart, openCheckout, wishlist, toggleWishlist, siteText, t } =
     useStore();
 
   const productId = useMemo(() => {
@@ -194,7 +194,7 @@ export function ProductDetailPage() {
             </button>
 
             <a
-              href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMessage)}`}
+              href={`https://wa.me/${siteText.wa}?text=${encodeURIComponent(waMessage)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-3 rounded-xl border border-[#17803d] text-[#17803d] dark:text-emerald-400 font-semibold text-sm hover:bg-[#17803d]/10"

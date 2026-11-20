@@ -1,6 +1,13 @@
 -- Inaya's Wardrobe - MySQL / MariaDB Schema for cPanel phpMyAdmin
--- Import this file into your cPanel MySQL database via phpMyAdmin.
+-- Instructions:
+--   1. In cPanel -> MySQL Databases, create a database & user (e.g. cpaneluser_inayas_wardrobe)
+--      Note: cPanel does not allow spaces or apostrophes (') in DB/User names.
+--   2. Assign the user to the database with ALL PRIVILEGES.
+--   3. In phpMyAdmin, click your database on the left sidebar, open the Import tab,
+--      and upload this file (database.sql). No CREATE DATABASE statement is included,
+--      so it imports cleanly on shared cPanel hosting.
 
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET NAMES utf8mb4;
 SET time_zone = '+06:00';
 

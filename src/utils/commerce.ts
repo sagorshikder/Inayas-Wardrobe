@@ -78,7 +78,9 @@ export function buildWardrobeWhatsAppUrl(params: {
   heightFt: number;
   finishName: string;
   estimatedTaka?: number;
+  waNumber?: string;
 }): string {
+  const targetWa = (params.waNumber || WA_NUMBER).replace(/[^\d]/g, '') || WA_NUMBER;
   const lines = [
     'Hello, I want a custom wardrobe.',
     `Size: ${params.widthFt} ft wide x ${params.heightFt} ft high`,
@@ -87,20 +89,34 @@ export function buildWardrobeWhatsAppUrl(params: {
   if (params.estimatedTaka && params.estimatedTaka > 0) {
     lines.push(`Estimated Quote: ${formatTaka(params.estimatedTaka)}`);
   }
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
+  return `https://wa.me/${targetWa}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
-export function buildCartWhatsAppUrl(items: CartItem[]): string {
+export function buildCartWhatsAppUrl(items: CartItem[], waNumber?: string): string {
+  const targetWa = (waNumber || WA_NUMBER).replace(/[^\d]/g, '') || WA_NUMBER;
   const { total } = computeCartSummary(items);
   const lines = [
     'Hello, I want to order from Inaya\'s Wardrobe:',
     ...items.map((i) => `- ${i.name} x ${i.qty} = ${formatTaka(i.price * i.qty)}`),
     `Total: ${formatTaka(total)}`,
   ];
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
+  return `https://wa.me/${targetWa}?text=${encodeURIComponent(lines.join('\n'))}`;
 }
 
 const VALID_PAYMENTS = new Set<string>(['COD', 'bKash', 'Nagad', 'Rocket', 'IBBL']);
+
+export function normalizePhoneDigits(raw: string): string {
+  const digits = (raw || '').replace(/\D/g, '');
+  if (digits.startsWith('880') && digits.length === 13) {
+    return digits.slice(2);
+  }
+  return digits;
+}
+
+export function isValidBdPhone(raw: string): boolean {
+  const normalized = normalizePhoneDigits(raw);
+  return /^01[3-9]\d{8}$/.test(normalized);
+}
 
 export function validateOrderPayload(input: OrderValidationInput): {
   valid: boolean;
@@ -108,13 +124,16 @@ export function validateOrderPayload(input: OrderValidationInput): {
   normalizedTotal: number;
 } {
   const name = (input.name || '').trim();
-  const digits = (input.phone || '').replace(/\D/g, '');
   const address = (input.address || '').trim();
   if (name.length < 2) {
     return { valid: false, error: 'Please enter your full name.', normalizedTotal: 0 };
   }
-  if (digits.length < 10 || digits.length > 15) {
-    return { valid: false, error: 'Please enter a valid 11-digit phone number.', normalizedTotal: 0 };
+  if (!isValidBdPhone(input.phone)) {
+    return {
+      valid: false,
+      error: 'Please enter a valid 11-digit BD mobile number (e.g. 017XXXXXXXX).',
+      normalizedTotal: 0,
+    };
   }
   if (address.length < 4) {
     return { valid: false, error: 'Please provide a complete delivery address.', normalizedTotal: 0 };

@@ -94,7 +94,16 @@ interface LocalStoreFile {
 
 const DATA_FILE = path.resolve(process.cwd(), 'data', 'local-db.json');
 
+function assertDevFallbackAllowed(): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'MySQL database is not configured. Set DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD in production.',
+    );
+  }
+}
+
 function readLocalStore(): LocalStoreFile {
+  assertDevFallbackAllowed();
   try {
     if (fs.existsSync(DATA_FILE)) {
       const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')) as Partial<LocalStoreFile>;
@@ -126,6 +135,7 @@ function readLocalStore(): LocalStoreFile {
 }
 
 function writeLocalStore(data: LocalStoreFile): void {
+  assertDevFallbackAllowed();
   const dir = path.dirname(DATA_FILE);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -143,7 +153,10 @@ function parseJsonSafe<T>(raw: unknown, fallback: T): T {
 }
 
 export async function getDatabaseMode(): Promise<'mysql' | 'local-store'> {
-  if (!isMysqlConfigured()) return 'local-store';
+  if (!isMysqlConfigured()) {
+    assertDevFallbackAllowed();
+    return 'local-store';
+  }
   await ensureMysqlSchema();
   return 'mysql';
 }
