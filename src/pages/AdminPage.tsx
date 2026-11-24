@@ -19,6 +19,7 @@ import {
   DEFAULT_PRODUCTS,
   DEFAULT_SITE_TEXT,
   STORE_CATEGORIES,
+  STUDIO_MEDIA,
   type ProductRecord,
   type SiteTextConfig,
 } from '../data/catalog';
@@ -1230,7 +1231,7 @@ export function AdminPage() {
               <div className="p-3 rounded-xl border border-[#dccfbe] dark:border-[#3d2f25] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <img
-                    src={siteImages.hero || '/cover-photo.jpg'}
+                    src={siteImages.hero || STUDIO_MEDIA.heroCover}
                     alt="Hero Cover"
                     className="w-16 h-12 rounded-lg object-cover bg-[#ece3d6]"
                   />

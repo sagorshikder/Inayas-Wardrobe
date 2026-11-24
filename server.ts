@@ -58,6 +58,9 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const APP_ROOT = fs.existsSync(path.join(__dirname, 'package.json'))
+  ? __dirname
+  : path.resolve(__dirname, '..');
 
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = '0.0.0.0';
@@ -87,7 +90,7 @@ async function startServer() {
   });
 
   // Serve uploaded media files with aggressive cache headers
-  const uploadsDir = path.join(__dirname, 'data', 'uploads');
+  const uploadsDir = path.join(APP_ROOT, 'data', 'uploads');
   app.use(
     '/uploads',
     express.static(uploadsDir, {
@@ -97,7 +100,7 @@ async function startServer() {
   );
 
   // Expose public assets cleanly at both / and /public paths
-  const publicDir = path.join(__dirname, 'public');
+  const publicDir = path.join(APP_ROOT, 'public');
   if (fs.existsSync(publicDir)) {
     app.use('/public', express.static(publicDir, { maxAge: '7d' }));
     app.use(express.static(publicDir, { maxAge: '7d' }));
@@ -118,7 +121,7 @@ async function startServer() {
     '/sitemap.xml',
   ];
   app.get(rootAssets, (req, res, next) => {
-    const filePath = path.join(__dirname, req.path.replace(/^\/+/, ''));
+    const filePath = path.join(APP_ROOT, req.path.replace(/^\/+/, ''));
     if (fs.existsSync(filePath)) {
       if (/\.(webp|png|jpe?g|ico)$/i.test(req.path)) {
         res.setHeader('Cache-Control', 'public, max-age=604800');
@@ -957,7 +960,7 @@ async function startServer() {
   });
 
   // ---- Frontend Serving (Vite Dev Middleware or Production Dist) ----
-  const distDir = path.join(__dirname, 'dist');
+  const distDir = path.join(APP_ROOT, 'dist');
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({

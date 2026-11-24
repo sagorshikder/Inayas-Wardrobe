@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /Admin-Panel/
+Disallow: /cgi-bin/
+
+Sitemap: https://inayaswardrobe.com/sitemap.xml

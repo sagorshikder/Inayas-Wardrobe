@@ -424,6 +424,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAuthReady(true);
   }, []);
 
+  const parseApiJson = async <T extends { error?: string }>(res: Response): Promise<T> => {
+    const text = await res.text();
+    try {
+      return (text ? JSON.parse(text) : {}) as T;
+    } catch {
+      throw new Error(
+        res.status === 404
+          ? 'API endpoint returned 404. Ensure the Node.js app (app.cjs) is running on this domain.'
+          : `Unexpected server response (HTTP ${res.status}).`,
+      );
+    }
+  };
+
   const signInWithEmail = useCallback(
     async (email: string, password: string) => {
       const res = await fetch('/api/auth/login', {
@@ -431,12 +444,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = (await res.json()) as {
+      const data = await parseApiJson<{
         error?: string;
         token?: string;
         user?: AuthUser;
         isAdmin?: boolean;
-      };
+      }>(res);
       if (!res.ok || !data.token || !data.user) {
         throw new Error(data.error || 'Sign-in failed.');
       }
@@ -452,12 +465,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
-      const data = (await res.json()) as {
+      const data = await parseApiJson<{
         error?: string;
         token?: string;
         user?: AuthUser;
         isAdmin?: boolean;
-      };
+      }>(res);
       if (!res.ok || !data.token || !data.user) {
         throw new Error(data.error || 'Registration failed.');
       }
@@ -473,12 +486,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name, setupToken }),
       });
-      const data = (await res.json()) as {
+      const data = await parseApiJson<{
         error?: string;
         token?: string;
         user?: AuthUser;
         isAdmin?: boolean;
-      };
+      }>(res);
       if (!res.ok || !data.token || !data.user) {
         throw new Error(data.error || 'Admin setup failed.');
       }

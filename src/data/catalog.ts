@@ -25,6 +25,8 @@ import prodSlidingWardrobe from '../assets/images/prod_sliding_wardrobe_17951736
 import prodHingedWardrobe from '../assets/images/prod_hinged_wardrobe_1795173612542.webp';
 import prodRoyalBed from '../assets/images/prod_royal_bed_1795173611793.webp';
 import aboutWorkshop from '../assets/images/about_workshop_1795173612517.webp';
+import brandLogo from '../assets/images/brand_logo.webp';
+import heroCover from '../assets/images/hero_cover.webp';
 
 export interface ProductRecord {
   id: string;
@@ -90,8 +92,8 @@ export interface SiteTextConfig {
 }
 
 export const STUDIO_MEDIA = {
-  logo: '/Logo.webp',
-  heroCover: '/cover-photo.webp',
+  logo: brandLogo,
+  heroCover,
   galleryWatermark,
   feature3dBg,
   customDesignBg,

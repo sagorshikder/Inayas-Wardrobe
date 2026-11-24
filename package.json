@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "npx tsx server.ts",
     "start": "node server.ts",
+    "start:cpanel": "node app.cjs",
     "start:tsx": "tsx server.ts",
-    "build": "vite build",
+    "build": "vite build && npm run build:server",
+    "build:server": "esbuild server.ts --bundle --platform=node --format=esm --packages=external --outfile=dist-server/server.mjs",
     "db:check": "tsx src/db/check.ts",
     "lint": "tsc --noEmit"
   },
